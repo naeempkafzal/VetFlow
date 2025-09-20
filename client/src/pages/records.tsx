@@ -94,11 +94,29 @@ export default function Records() {
     },
   });
 
-  const filteredAnimals = animals?.filter(animal =>
-    animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    animal.ownerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    animal.species.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredAnimals = animals?.filter(animal => {
+    const query = searchQuery.toLowerCase();
+    
+    // Search in animal fields
+    const animalMatch = animal.name.toLowerCase().includes(query) ||
+                       animal.ownerName.toLowerCase().includes(query) ||
+                       animal.species.toLowerCase().includes(query) ||
+                       (animal.breed && animal.breed.toLowerCase().includes(query)) ||
+                       (animal.location && animal.location.toLowerCase().includes(query));
+    
+    // Search in visit records
+    const animalVisits = visitRecords?.filter(record => record.animalId === animal.id) || [];
+    const visitMatch = animalVisits.some(visit => 
+      (visit.symptoms && visit.symptoms.toLowerCase().includes(query)) ||
+      (visit.diagnosis && visit.diagnosis.toLowerCase().includes(query)) ||
+      (visit.treatment && visit.treatment.toLowerCase().includes(query)) ||
+      (visit.medications && visit.medications.toLowerCase().includes(query)) ||
+      (visit.notes && visit.notes.toLowerCase().includes(query)) ||
+      (visit.veterinarianName && visit.veterinarianName.toLowerCase().includes(query))
+    );
+    
+    return animalMatch || visitMatch;
+  }) || [];
 
   // Update visit form when selected animal changes
   React.useEffect(() => {
