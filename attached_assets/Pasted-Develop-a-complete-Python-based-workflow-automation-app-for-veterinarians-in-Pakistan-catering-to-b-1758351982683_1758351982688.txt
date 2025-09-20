@@ -1,0 +1,16 @@
+Develop a complete Python-based workflow automation app for veterinarians in Pakistan, catering to both livestock (cows, buffaloes, goats) and pets (dogs, cats) in rural and urban areas like Punjab, Sindh, Lahore, and Karachi. The app must streamline vet operations and address local challenges like limited access to services, disease outbreaks, and compliance with Pakistan Veterinary Medical Council (PVMC) guidelines. Include the following integrated features:
+Symptom Checker: A console-based or Flask web interface for diagnosing common diseases (e.g., Haemorrhagic Septicaemia, foot-and-mouth disease for livestock; rabies for pets) using a questionnaire with if-elif logic and hardcoded knowledge base (no external APIs). Suggest treatments and include Urdu disease names.
+Record-Keeping: Store animal/patient records (animal ID, owner details, visit history, treatments) in a local SQLite database or JSON files. Support Urdu/English printable summaries for farm/clinic visits.
+Vaccination and Inventory Tracker: Track vaccination schedules (e.g., HS vaccine, rabies) with due date alerts via console, and manage clinic inventory (drugs/vaccines) with low-stock warnings. Include PKR cost tracking and local vaccine names.
+Appointment Scheduler: A calendar-based booking system for clinic visits using datetime, with console-based client reminders (simulated SMS/email) for urban pet owners.
+Outbreak Reporter: A form to log disease outbreaks (e.g., tick-borne diseases) with manual geo-coordinate input and a hardcoded advisory generator for biosafety protocols based on provincial guidelines.
+Unique Features for Irreplaceability: Add a farm productivity calculator (e.g., milk yield loss from illness), a pet welfare score based on health data, and a basic antimicrobial resistance (AMR) risk assessor using treatment history.
+Pakistan-Specific Tailoring: Incorporate local disease terminology, metric units, PVMC vaccine schedules, provincial livestock department compliance, and support for Urdu prompts via print statements or Flask templates. Address challenges like medicine shortages, climate-driven outbreaks, and stray animal threats. Use PKR for all costs and include references to local resources (e.g., UVAS guidelines, hardcoded).
+Replit Free-Tier Constraints: Build the app in a single Repl using only free resources: no paid deployments, storage under 2 GiB, no external APIs, no outbound data >10 GiB/month, and no more than 10 public apps. Use standard libraries (json, sqlite3, flask, datetime, pandas, numpy) and optionally tkinter for a basic GUI. Avoid dependencies requiring internet post-setup. Ensure the app runs locally via console or http://0.0.0.0:8080 for Flask.
+Deliverables: Provide complete, runnable code in main.py (or app.py for Flask), including:
+SQLite schema or JSON sample data (e.g., animal records, inventory).
+Templates folder for Flask if web-based.
+A README.md with setup instructions (e.g., pip install flask pandas numpy, python main.py).
+Sample data for testing (e.g., 5 animals, 2 outbreaks).
+Clear steps to run locally in Replit’s free environment without upgrades.
+Ensure the app is fully functional, tested, and immediately usable by vets after forking the Repl, with no reliance on external services."
