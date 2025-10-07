@@ -1,0 +1,59 @@
+import React, { useState } from "react";
+
+const FarmCalculator: React.FC = () => {
+  const [daysIll, setDaysIll] = useState(0);
+  const [milkYield, setMilkYield] = useState(0);
+  const [loss, setLoss] = useState<number | null>(null);
+  const [lang, setLang] = useState<"en" | "ur">("en");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const dailyLoss = milkYield * 0.5; // Assume 50% loss per day during illness
+    setLoss(daysIll * dailyLoss);
+  };
+
+  return (
+    <div className="container mx-auto p-4">
+      <button onClick={() => setLang(lang === "en" ? "ur" : "en")} className="mb-4 p-2 bg-secondary text-secondary-foreground rounded">
+        Switch Language (تبدیل زبان)
+      </button>
+      <h1 className="text-3xl font-bold text-foreground mb-6 urdu-text">
+        {lang === "en" ? "Farm Productivity Calculator" : "فارم کی پیداوار کا حساب کتاب"}
+      </h1>
+      <form onSubmit={handleSubmit} className="glass-card p-6 rounded-lg shadow-md max-w-md">
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-muted-foreground">
+            {lang === "en" ? "Days Ill:" : "بیماری کے دن:"}
+          </label>
+          <input
+            type="number"
+            value={daysIll}
+            onChange={(e) => setDaysIll(parseInt(e.target.value) || 0)}
+            required
+            className="mt-1 p-2 w-full border border-border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-muted-foreground">
+            {lang === "en" ? "Daily Milk Yield (Liters):" : "روزانہ دودھ کی پیداوار (لیٹر):"}
+          </label>
+          <input
+            type="number"
+            value={milkYield}
+            onChange={(e) => setMilkYield(parseInt(e.target.value) || 0)}
+            required
+            className="mt-1 p-2 w-full border border-border rounded"
+          />
+        </div>
+        <button type="submit" className="w-full py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90">
+          {lang === "en" ? "Calculate Loss" : "نقصان کا حساب لگائیں"}
+        </button>
+      </form>
+      {loss !== null && <p className="mt-4 text-sm text-foreground">
+        {lang === "en" ? `Estimated Milk Yield Loss: ${loss} Liters` : `تخمینی دودھ کی پیداوار کا نقصان: ${loss} لیٹر`}
+      </p>}
+    </div>
+  );
+};
+
+export default FarmCalculator;

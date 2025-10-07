@@ -1,10 +1,21 @@
+// schema.ts
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  integer,
+  real,
+  boolean,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const animals = pgTable("animals", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   species: text("species").notNull(), // cow, buffalo, goat, dog, cat
   breed: text("breed"),
@@ -20,8 +31,12 @@ export const animals = pgTable("animals", {
 });
 
 export const visitRecords = pgTable("visit_records", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  animalId: varchar("animal_id").references(() => animals.id).notNull(),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  animalId: varchar("animal_id")
+    .references(() => animals.id)
+    .notNull(),
   visitDate: timestamp("visit_date").defaultNow(),
   symptoms: text("symptoms"),
   diagnosis: text("diagnosis"),
@@ -33,8 +48,12 @@ export const visitRecords = pgTable("visit_records", {
 });
 
 export const vaccinations = pgTable("vaccinations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  animalId: varchar("animal_id").references(() => animals.id).notNull(),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  animalId: varchar("animal_id")
+    .references(() => animals.id)
+    .notNull(),
   vaccineName: text("vaccine_name").notNull(),
   vaccineNameUrdu: text("vaccine_name_urdu"),
   dateGiven: timestamp("date_given").notNull(),
@@ -45,7 +64,9 @@ export const vaccinations = pgTable("vaccinations", {
 });
 
 export const inventory = pgTable("inventory", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   itemName: text("item_name").notNull(),
   itemNameUrdu: text("item_name_urdu"),
   category: text("category").notNull(), // vaccine, medicine, equipment
@@ -59,7 +80,9 @@ export const inventory = pgTable("inventory", {
 });
 
 export const appointments = pgTable("appointments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   animalId: varchar("animal_id").references(() => animals.id),
   ownerName: text("owner_name").notNull(),
   ownerPhone: text("owner_phone").notNull(),
@@ -71,7 +94,9 @@ export const appointments = pgTable("appointments", {
 });
 
 export const outbreaks = pgTable("outbreaks", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   diseaseName: text("disease_name").notNull(),
   diseaseNameUrdu: text("disease_name_urdu"),
   location: text("location").notNull(),
@@ -88,30 +113,66 @@ export const outbreaks = pgTable("outbreaks", {
 });
 
 // Insert schemas
-export const insertAnimalSchema = createInsertSchema(animals).omit({
+export const insertAnimalSchema = createInsertSchema(animals, {
+  age: z.number().optional(),
+  weight: z.number().optional(),
+  breed: z.string().optional(),
+  gender: z.string().optional(),
+  ownerPhone: z.string().optional(),
+  ownerAddress: z.string().optional(),
+  location: z.string().optional(),
+}).omit({
   id: true,
   registrationDate: true,
 });
 
-export const insertVisitRecordSchema = createInsertSchema(visitRecords).omit({
+export const insertVisitRecordSchema = createInsertSchema(visitRecords, {
+  symptoms: z.string().optional(),
+  treatment: z.string().optional(),
+  medications: z.string().optional(),
+  cost: z.number().optional(),
+  notes: z.string().optional(),
+  veterinarianName: z.string().optional(),
+}).omit({
   id: true,
   visitDate: true,
 });
 
-export const insertVaccinationSchema = createInsertSchema(vaccinations).omit({
+export const insertVaccinationSchema = createInsertSchema(vaccinations, {
+  vaccineNameUrdu: z.string().optional(),
+  nextDueDate: z.date().optional(),
+  batchNumber: z.string().optional(),
+  cost: z.number().optional(),
+  veterinarianName: z.string().optional(),
+}).omit({
   id: true,
 });
 
-export const insertInventorySchema = createInsertSchema(inventory).omit({
+export const insertInventorySchema = createInsertSchema(inventory, {
+  itemNameUrdu: z.string().optional(),
+  costPerUnit: z.number().optional(),
+  supplier: z.string().optional(),
+  expiryDate: z.date().optional(),
+}).omit({
   id: true,
   lastRestocked: true,
 });
 
-export const insertAppointmentSchema = createInsertSchema(appointments).omit({
+export const insertAppointmentSchema = createInsertSchema(appointments, {
+  animalId: z.string().optional(),
+  notes: z.string().optional(),
+  status: z.string().optional(),
+  reminderSent: z.boolean().optional(),
+}).omit({
   id: true,
 });
 
-export const insertOutbreakSchema = createInsertSchema(outbreaks).omit({
+export const insertOutbreakSchema = createInsertSchema(outbreaks, {
+  diseaseNameUrdu: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  biosafetyMeasures: z.string().optional(),
+}).omit({
   id: true,
   reportDate: true,
 });

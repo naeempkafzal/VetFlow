@@ -1,4 +1,18 @@
-import { type Animal, type InsertAnimal, type VisitRecord, type InsertVisitRecord, type Vaccination, type InsertVaccination, type Inventory, type InsertInventory, type Appointment, type InsertAppointment, type Outbreak, type InsertOutbreak } from "@shared/schema";
+// storage.ts
+import {
+  type Animal,
+  type InsertAnimal,
+  type VisitRecord,
+  type InsertVisitRecord,
+  type Vaccination,
+  type InsertVaccination,
+  type Inventory,
+  type InsertInventory,
+  type Appointment,
+  type InsertAppointment,
+  type Outbreak,
+  type InsertOutbreak,
+} from "../../shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -7,43 +21,55 @@ export interface IStorage {
   getAnimals(): Promise<Animal[]>;
   getAnimalsByOwner(ownerName: string): Promise<Animal[]>;
   createAnimal(animal: InsertAnimal): Promise<Animal>;
-  updateAnimal(id: string, updates: Partial<Animal>): Promise<Animal | undefined>;
-  
+  updateAnimal(
+    id: string,
+    updates: Partial<Animal>,
+  ): Promise<Animal | undefined>;
+
   // Visit Records
   getVisitRecord(id: string): Promise<VisitRecord | undefined>;
   getVisitRecords(): Promise<VisitRecord[]>;
   getVisitRecordsByAnimal(animalId: string): Promise<VisitRecord[]>;
   createVisitRecord(record: InsertVisitRecord): Promise<VisitRecord>;
-  
+
   // Vaccinations
   getVaccination(id: string): Promise<Vaccination | undefined>;
   getVaccinations(): Promise<Vaccination[]>;
   getVaccinationsByAnimal(animalId: string): Promise<Vaccination[]>;
   getOverdueVaccinations(): Promise<Vaccination[]>;
   createVaccination(vaccination: InsertVaccination): Promise<Vaccination>;
-  
+
   // Inventory
   getInventoryItem(id: string): Promise<Inventory | undefined>;
   getInventory(): Promise<Inventory[]>;
   getLowStockItems(): Promise<Inventory[]>;
   getExpiringItems(days: number): Promise<Inventory[]>;
   createInventoryItem(item: InsertInventory): Promise<Inventory>;
-  updateInventoryItem(id: string, updates: Partial<Inventory>): Promise<Inventory | undefined>;
-  
+  updateInventoryItem(
+    id: string,
+    updates: Partial<Inventory>,
+  ): Promise<Inventory | undefined>;
+
   // Appointments
   getAppointment(id: string): Promise<Appointment | undefined>;
   getAppointments(): Promise<Appointment[]>;
   getAppointmentsByDate(date: Date): Promise<Appointment[]>;
   getUpcomingAppointments(): Promise<Appointment[]>;
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
-  updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment | undefined>;
-  
+  updateAppointment(
+    id: string,
+    updates: Partial<Appointment>,
+  ): Promise<Appointment | undefined>;
+
   // Outbreaks
   getOutbreak(id: string): Promise<Outbreak | undefined>;
   getOutbreaks(): Promise<Outbreak[]>;
   getActiveOutbreaks(): Promise<Outbreak[]>;
   createOutbreak(outbreak: InsertOutbreak): Promise<Outbreak>;
-  updateOutbreak(id: string, updates: Partial<Outbreak>): Promise<Outbreak | undefined>;
+  updateOutbreak(
+    id: string,
+    updates: Partial<Outbreak>,
+  ): Promise<Outbreak | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -61,8 +87,7 @@ export class MemStorage implements IStorage {
     this.inventory = new Map();
     this.appointments = new Map();
     this.outbreaks = new Map();
-    
-    // Initialize with some sample data
+
     this.initializeSampleData();
   }
 
@@ -83,7 +108,7 @@ export class MemStorage implements IStorage {
       registrationDate: new Date("2024-01-15"),
       isActive: true,
     };
-    
+
     const animal2: Animal = {
       id: "animal-2",
       name: "بلی میو",
@@ -119,7 +144,7 @@ export class MemStorage implements IStorage {
         lastRestocked: new Date("2024-09-01"),
       },
       {
-        id: "inv-2", 
+        id: "inv-2",
         itemName: "Rabies Vaccine",
         itemNameUrdu: "ریبیز ویکسین",
         category: "vaccine",
@@ -130,10 +155,10 @@ export class MemStorage implements IStorage {
         supplier: "Boehringer Ingelheim",
         expiryDate: new Date("2025-03-15"),
         lastRestocked: new Date("2024-08-15"),
-      }
+      },
     ];
 
-    inventoryItems.forEach(item => this.inventory.set(item.id, item));
+    inventoryItems.forEach((item) => this.inventory.set(item.id, item));
   }
 
   // Animals
@@ -142,12 +167,16 @@ export class MemStorage implements IStorage {
   }
 
   async getAnimals(): Promise<Animal[]> {
-    return Array.from(this.animals.values()).filter(animal => animal.isActive);
+    return Array.from(this.animals.values()).filter(
+      (animal) => animal.isActive,
+    );
   }
 
   async getAnimalsByOwner(ownerName: string): Promise<Animal[]> {
     return Array.from(this.animals.values()).filter(
-      animal => animal.ownerName.toLowerCase().includes(ownerName.toLowerCase()) && animal.isActive
+      (animal) =>
+        animal.ownerName.toLowerCase().includes(ownerName.toLowerCase()) &&
+        animal.isActive,
     );
   }
 
@@ -170,10 +199,13 @@ export class MemStorage implements IStorage {
     return animal;
   }
 
-  async updateAnimal(id: string, updates: Partial<Animal>): Promise<Animal | undefined> {
+  async updateAnimal(
+    id: string,
+    updates: Partial<Animal>,
+  ): Promise<Animal | undefined> {
     const animal = this.animals.get(id);
     if (!animal) return undefined;
-    
+
     const updatedAnimal = { ...animal, ...updates };
     this.animals.set(id, updatedAnimal);
     return updatedAnimal;
@@ -189,10 +221,14 @@ export class MemStorage implements IStorage {
   }
 
   async getVisitRecordsByAnimal(animalId: string): Promise<VisitRecord[]> {
-    return Array.from(this.visitRecords.values()).filter(record => record.animalId === animalId);
+    return Array.from(this.visitRecords.values()).filter(
+      (record) => record.animalId === animalId,
+    );
   }
 
-  async createVisitRecord(insertRecord: InsertVisitRecord): Promise<VisitRecord> {
+  async createVisitRecord(
+    insertRecord: InsertVisitRecord,
+  ): Promise<VisitRecord> {
     const id = randomUUID();
     const record: VisitRecord = {
       ...insertRecord,
@@ -220,17 +256,21 @@ export class MemStorage implements IStorage {
   }
 
   async getVaccinationsByAnimal(animalId: string): Promise<Vaccination[]> {
-    return Array.from(this.vaccinations.values()).filter(vacc => vacc.animalId === animalId);
+    return Array.from(this.vaccinations.values()).filter(
+      (vacc) => vacc.animalId === animalId,
+    );
   }
 
   async getOverdueVaccinations(): Promise<Vaccination[]> {
     const now = new Date();
     return Array.from(this.vaccinations.values()).filter(
-      vacc => vacc.nextDueDate && vacc.nextDueDate < now
+      (vacc) => vacc.nextDueDate && vacc.nextDueDate < now,
     );
   }
 
-  async createVaccination(insertVaccination: InsertVaccination): Promise<Vaccination> {
+  async createVaccination(
+    insertVaccination: InsertVaccination,
+  ): Promise<Vaccination> {
     const id = randomUUID();
     const vaccination: Vaccination = {
       ...insertVaccination,
@@ -256,16 +296,16 @@ export class MemStorage implements IStorage {
 
   async getLowStockItems(): Promise<Inventory[]> {
     return Array.from(this.inventory.values()).filter(
-      item => item.currentStock <= item.minStockLevel
+      (item) => item.currentStock <= item.minStockLevel,
     );
   }
 
   async getExpiringItems(days: number): Promise<Inventory[]> {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + days);
-    
+
     return Array.from(this.inventory.values()).filter(
-      item => item.expiryDate && item.expiryDate <= futureDate
+      (item) => item.expiryDate && item.expiryDate <= futureDate,
     );
   }
 
@@ -284,10 +324,13 @@ export class MemStorage implements IStorage {
     return item;
   }
 
-  async updateInventoryItem(id: string, updates: Partial<Inventory>): Promise<Inventory | undefined> {
+  async updateInventoryItem(
+    id: string,
+    updates: Partial<Inventory>,
+  ): Promise<Inventory | undefined> {
     const item = this.inventory.get(id);
     if (!item) return undefined;
-    
+
     const updatedItem = { ...item, ...updates };
     this.inventory.set(id, updatedItem);
     return updatedItem;
@@ -305,18 +348,22 @@ export class MemStorage implements IStorage {
   async getAppointmentsByDate(date: Date): Promise<Appointment[]> {
     const targetDate = date.toDateString();
     return Array.from(this.appointments.values()).filter(
-      apt => apt.appointmentDate.toDateString() === targetDate
+      (apt) => apt.appointmentDate.toDateString() === targetDate,
     );
   }
 
   async getUpcomingAppointments(): Promise<Appointment[]> {
     const now = new Date();
     return Array.from(this.appointments.values())
-      .filter(apt => apt.appointmentDate >= now && apt.status === "scheduled")
-      .sort((a, b) => a.appointmentDate.getTime() - b.appointmentDate.getTime());
+      .filter((apt) => apt.appointmentDate >= now && apt.status === "scheduled")
+      .sort(
+        (a, b) => a.appointmentDate.getTime() - b.appointmentDate.getTime(),
+      );
   }
 
-  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+  async createAppointment(
+    insertAppointment: InsertAppointment,
+  ): Promise<Appointment> {
     const id = randomUUID();
     const appointment: Appointment = {
       ...insertAppointment,
@@ -330,10 +377,13 @@ export class MemStorage implements IStorage {
     return appointment;
   }
 
-  async updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment | undefined> {
+  async updateAppointment(
+    id: string,
+    updates: Partial<Appointment>,
+  ): Promise<Appointment | undefined> {
     const appointment = this.appointments.get(id);
     if (!appointment) return undefined;
-    
+
     const updatedAppointment = { ...appointment, ...updates };
     this.appointments.set(id, updatedAppointment);
     return updatedAppointment;
@@ -349,7 +399,9 @@ export class MemStorage implements IStorage {
   }
 
   async getActiveOutbreaks(): Promise<Outbreak[]> {
-    return Array.from(this.outbreaks.values()).filter(outbreak => outbreak.status === "active");
+    return Array.from(this.outbreaks.values()).filter(
+      (outbreak) => outbreak.status === "active",
+    );
   }
 
   async createOutbreak(insertOutbreak: InsertOutbreak): Promise<Outbreak> {
@@ -368,10 +420,13 @@ export class MemStorage implements IStorage {
     return outbreak;
   }
 
-  async updateOutbreak(id: string, updates: Partial<Outbreak>): Promise<Outbreak | undefined> {
+  async updateOutbreak(
+    id: string,
+    updates: Partial<Outbreak>,
+  ): Promise<Outbreak | undefined> {
     const outbreak = this.outbreaks.get(id);
     if (!outbreak) return undefined;
-    
+
     const updatedOutbreak = { ...outbreak, ...updates };
     this.outbreaks.set(id, updatedOutbreak);
     return updatedOutbreak;

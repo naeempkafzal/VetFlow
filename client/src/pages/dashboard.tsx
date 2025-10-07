@@ -1,8 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useTranslation } from "@/lib/translations";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { useTranslation } from "../lib/translations";
 import {
   Stethoscope,
   Calendar,
@@ -11,9 +16,9 @@ import {
   Syringe,
   TrendingUp,
   Plus,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom"; // Changed from wouter to react-router-dom
 
 interface DashboardStats {
   totalAnimals: number;
@@ -24,22 +29,35 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation(); // Added language for conditional rendering
 
-  const { data: stats, isLoading } = useQuery<DashboardStats>({
-    queryKey: ["/api/analytics/dashboard"],
+  const {
+    data: stats = {
+      totalAnimals: 0,
+      upcomingAppointments: 0,
+      lowStockItems: 0,
+      activeOutbreaks: 0,
+      overdueVaccinations: 0,
+    },
+    isLoading,
+  } = useQuery<DashboardStats>({
+    queryKey: ["http://localhost:5001/api/analytics/dashboard"],
+    retry: false,
   });
 
-  const { data: upcomingAppointments } = useQuery({
-    queryKey: ["/api/appointments/upcoming"],
+  const { data: upcomingAppointments = [] } = useQuery<any[]>({
+    queryKey: ["http://localhost:5001/api/appointments/upcoming"],
+    retry: false,
   });
 
-  const { data: lowStockItems } = useQuery({
-    queryKey: ["/api/inventory/low-stock"],
+  const { data: lowStockItems = [] } = useQuery<any[]>({
+    queryKey: ["http://localhost:5001/api/inventory/low-stock"],
+    retry: false,
   });
 
-  const { data: activeOutbreaks } = useQuery({
-    queryKey: ["/api/outbreaks/active"],
+  const { data: activeOutbreaks = [] } = useQuery<any[]>({
+    queryKey: ["http://localhost:5001/api/outbreaks/active"],
+    retry: false,
   });
 
   if (isLoading) {
@@ -59,39 +77,40 @@ export default function Dashboard() {
 
   const statCards = [
     {
-      title: t("dashboard.stats.totalAnimals"),
-      value: stats?.totalAnimals || 0,
+      title: t("dashboard.stats.totalAnimals") || "Total Animals",
+      value: stats.totalAnimals,
       icon: Stethoscope,
       color: "text-blue-600",
-      bgColor: "bg-blue-50"
+      bgColor: "bg-blue-50",
     },
     {
-      title: t("dashboard.stats.upcomingAppointments"),
-      value: stats?.upcomingAppointments || 0,
+      title:
+        t("dashboard.stats.upcomingAppointments") || "Upcoming Appointments",
+      value: stats.upcomingAppointments,
       icon: Calendar,
       color: "text-green-600",
-      bgColor: "bg-green-50"
+      bgColor: "bg-green-50",
     },
     {
-      title: t("dashboard.stats.lowStockItems"),
-      value: stats?.lowStockItems || 0,
+      title: t("dashboard.stats.lowStockItems") || "Low Stock Items",
+      value: stats.lowStockItems,
       icon: Package,
       color: "text-orange-600",
-      bgColor: "bg-orange-50"
+      bgColor: "bg-orange-50",
     },
     {
-      title: t("dashboard.stats.activeOutbreaks"),
-      value: stats?.activeOutbreaks || 0,
+      title: t("dashboard.stats.activeOutbreaks") || "Active Outbreaks",
+      value: stats.activeOutbreaks,
       icon: AlertTriangle,
       color: "text-red-600",
-      bgColor: "bg-red-50"
+      bgColor: "bg-red-50",
     },
     {
-      title: t("dashboard.stats.overdueVaccinations"),
-      value: stats?.overdueVaccinations || 0,
+      title: t("dashboard.stats.overdueVaccinations") || "Overdue Vaccinations",
+      value: stats.overdueVaccinations,
       icon: Syringe,
       color: "text-purple-600",
-      bgColor: "bg-purple-50"
+      bgColor: "bg-purple-50",
     },
   ];
 
@@ -101,21 +120,25 @@ export default function Dashboard() {
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              {t("dashboard.welcome")}
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              {t("dashboard.welcome") || "Welcome to Vet Dashboard"}
             </h1>
-            <p className="text-muted-foreground">
-              {t("dashboard.subtitle")}
+            <p className="text-gray-600">
+              {t("dashboard.subtitle") ||
+                "Overview of your veterinary operations"}
             </p>
           </div>
           <div className="mt-4 md:mt-0 flex gap-2">
-            <Link href="/symptom-checker">
-              <Button className="gradient-bg text-white" data-testid="quick-symptom-check">
+            <Link to="/symptom-checker">
+              <Button
+                className="bg-blue-600 text-white hover:bg-blue-700"
+                data-testid="quick-symptom-check"
+              >
                 <Stethoscope className="h-4 w-4 mr-2" />
                 Quick Symptom Check
               </Button>
             </Link>
-            <Link href="/records">
+            <Link to="/records">
               <Button variant="outline" data-testid="add-animal">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Animal
@@ -133,8 +156,11 @@ export default function Dashboard() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">{stat.title}</p>
-                      <p className="text-2xl font-bold text-foreground" data-testid={`stat-${index}`}>
+                      <p className="text-sm text-gray-600">{stat.title}</p>
+                      <p
+                        className="text-2xl font-bold text-gray-800"
+                        data-testid={`stat-${index}`}
+                      >
                         {stat.value}
                       </p>
                     </div>
@@ -156,32 +182,48 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2 text-primary" />
+                <TrendingUp className="h-5 w-5 mr-2 text-blue-600" />
                 Quick Actions
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Link href="/symptom-checker">
-                  <Button variant="outline" className="h-20 flex-col" data-testid="action-symptom-checker">
+                <Link to="/symptom-checker">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col items-center justify-center"
+                    data-testid="action-symptom-checker"
+                  >
                     <Stethoscope className="h-6 w-6 mb-2" />
                     <span className="text-xs">Symptom Checker</span>
                   </Button>
                 </Link>
-                <Link href="/appointments">
-                  <Button variant="outline" className="h-20 flex-col" data-testid="action-appointments">
+                <Link to="/appointments">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col items-center justify-center"
+                    data-testid="action-appointments"
+                  >
                     <Calendar className="h-6 w-6 mb-2" />
                     <span className="text-xs">Appointments</span>
                   </Button>
                 </Link>
-                <Link href="/vaccinations">
-                  <Button variant="outline" className="h-20 flex-col" data-testid="action-vaccinations">
+                <Link to="/vaccinations">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col items-center justify-center"
+                    data-testid="action-vaccinations"
+                  >
                     <Syringe className="h-6 w-6 mb-2" />
                     <span className="text-xs">Vaccinations</span>
                   </Button>
                 </Link>
-                <Link href="/inventory">
-                  <Button variant="outline" className="h-20 flex-col" data-testid="action-inventory">
+                <Link to="/inventory">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col items-center justify-center"
+                    data-testid="action-inventory"
+                  >
                     <Package className="h-6 w-6 mb-2" />
                     <span className="text-xs">Inventory</span>
                   </Button>
@@ -195,39 +237,60 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-primary" />
+                  <Calendar className="h-5 w-5 mr-2 text-blue-600" />
                   Today's Appointments
                 </span>
-                <Link href="/appointments">
-                  <Button variant="ghost" size="sm" data-testid="view-all-appointments">
+                <Link to="/appointments">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-testid="view-all-appointments"
+                  >
                     View All <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
                 </Link>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {Array.isArray(upcomingAppointments) && upcomingAppointments.length > 0 ? (
+              {Array.isArray(upcomingAppointments) &&
+              upcomingAppointments.length > 0 ? (
                 <div className="space-y-3">
-                  {upcomingAppointments.slice(0, 3).map((appointment: any, index: number) => (
-                    <div key={appointment.id} className="flex items-center justify-between p-3 border rounded-lg" data-testid={`appointment-${index}`}>
-                      <div>
-                        <p className="font-medium">{appointment.ownerName}</p>
-                        <p className="text-sm text-muted-foreground">{appointment.purpose}</p>
+                  {upcomingAppointments
+                    .slice(0, 3)
+                    .map((appointment: any, index: number) => (
+                      <div
+                        key={appointment.id || index}
+                        className="flex items-center justify-between p-3 border rounded-lg bg-white"
+                        data-testid={`appointment-${index}`}
+                      >
+                        <div>
+                          <p className="font-medium text-gray-800">
+                            {appointment.ownerName}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {appointment.purpose}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-800">
+                            {new Date(
+                              appointment.appointmentDate,
+                            ).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                          <Badge variant="outline" className="text-gray-600">
+                            {appointment.status}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">
-                          {new Date(appointment.appointmentDate).toLocaleTimeString('en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                        <Badge variant="outline">{appointment.status}</Badge>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground text-center py-8">No appointments scheduled for today</p>
+                <p className="text-gray-600 text-center py-8">
+                  No appointments scheduled for today
+                </p>
               )}
             </CardContent>
           </Card>
@@ -245,15 +308,26 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {(stats?.lowStockItems || 0) > 0 && (
-                  <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg" data-testid="alert-low-stock">
+                {(stats.lowStockItems || 0) > 0 && (
+                  <div
+                    className="p-3 bg-orange-50 border border-orange-200 rounded-lg"
+                    data-testid="alert-low-stock"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-orange-800">Low Stock Items</p>
-                        <p className="text-xs text-orange-600">{stats?.lowStockItems || 0} items need restocking</p>
+                        <p className="text-sm font-medium text-orange-800">
+                          Low Stock Items
+                        </p>
+                        <p className="text-xs text-orange-600">
+                          {stats.lowStockItems} items need restocking
+                        </p>
                       </div>
-                      <Link href="/inventory">
-                        <Button size="sm" variant="outline" className="text-orange-600 border-orange-300">
+                      <Link to="/inventory">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-orange-600 border-orange-300"
+                        >
                           View
                         </Button>
                       </Link>
@@ -261,15 +335,26 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                {(stats?.overdueVaccinations || 0) > 0 && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg" data-testid="alert-overdue-vaccinations">
+                {(stats.overdueVaccinations || 0) > 0 && (
+                  <div
+                    className="p-3 bg-red-50 border border-red-200 rounded-lg"
+                    data-testid="alert-overdue-vaccinations"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-red-800">Overdue Vaccinations</p>
-                        <p className="text-xs text-red-600">{stats?.overdueVaccinations || 0} animals need vaccination</p>
+                        <p className="text-sm font-medium text-red-800">
+                          Overdue Vaccinations
+                        </p>
+                        <p className="text-xs text-red-600">
+                          {stats.overdueVaccinations} animals need vaccination
+                        </p>
                       </div>
-                      <Link href="/vaccinations">
-                        <Button size="sm" variant="outline" className="text-red-600 border-red-300">
+                      <Link to="/vaccinations">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-300"
+                        >
                           View
                         </Button>
                       </Link>
@@ -277,15 +362,26 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                {(stats?.activeOutbreaks || 0) > 0 && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg" data-testid="alert-active-outbreaks">
+                {(stats.activeOutbreaks || 0) > 0 && (
+                  <div
+                    className="p-3 bg-red-50 border border-red-200 rounded-lg"
+                    data-testid="alert-active-outbreaks"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-red-800">Active Outbreaks</p>
-                        <p className="text-xs text-red-600">{stats?.activeOutbreaks || 0} disease outbreaks reported</p>
+                        <p className="text-sm font-medium text-red-800">
+                          Active Outbreaks
+                        </p>
+                        <p className="text-xs text-red-600">
+                          {stats.activeOutbreaks} disease outbreaks reported
+                        </p>
                       </div>
-                      <Link href="/outbreaks">
-                        <Button size="sm" variant="outline" className="text-red-600 border-red-300">
+                      <Link to="/outbreaks">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-300"
+                        >
                           View
                         </Button>
                       </Link>
@@ -293,9 +389,13 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                {(!(stats?.lowStockItems || 0) && !(stats?.overdueVaccinations || 0) && !(stats?.activeOutbreaks || 0)) && (
-                  <p className="text-muted-foreground text-center py-4">No active alerts</p>
-                )}
+                {!(stats.lowStockItems || 0) &&
+                  !(stats.overdueVaccinations || 0) &&
+                  !(stats.activeOutbreaks || 0) && (
+                    <p className="text-gray-600 text-center py-4">
+                      No active alerts
+                    </p>
+                  )}
               </div>
             </CardContent>
           </Card>
@@ -303,21 +403,29 @@ export default function Dashboard() {
           {/* PVMC Compliance */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">PVMC Compliance</CardTitle>
+              <CardTitle className="text-sm text-gray-800">
+                PVMC Compliance
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span>Vaccination Records</span>
-                  <Badge variant="outline" className="text-green-600">✓ Compliant</Badge>
+                  <span className="text-gray-600">Vaccination Records</span>
+                  <Badge variant="outline" className="text-green-600">
+                    ✓ Compliant
+                  </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Treatment Logs</span>
-                  <Badge variant="outline" className="text-green-600">✓ Compliant</Badge>
+                  <span className="text-gray-600">Treatment Logs</span>
+                  <Badge variant="outline" className="text-green-600">
+                    ✓ Compliant
+                  </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Outbreak Reporting</span>
-                  <Badge variant="outline" className="text-green-600">✓ Compliant</Badge>
+                  <span className="text-gray-600">Outbreak Reporting</span>
+                  <Badge variant="outline" className="text-green-600">
+                    ✓ Compliant
+                  </Badge>
                 </div>
               </div>
             </CardContent>
