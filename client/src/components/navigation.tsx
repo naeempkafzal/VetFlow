@@ -35,7 +35,6 @@ export default function Navigation() {
     <nav className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex items-center space-x-4">
             <div className="gradient-bg w-10 h-10 rounded-lg flex items-center justify-center">
               <Stethoscope className="text-white h-6 w-6" />
@@ -46,7 +45,6 @@ export default function Navigation() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -64,7 +62,6 @@ export default function Navigation() {
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
                   )}
                   onClick={() => navigate(item.href)}
-                  data-testid={`nav-${item.name.toLowerCase().replace(' ', '-')}`}
                 >
                   <Icon className="h-4 w-4 mr-2" />
                   {item.name}
@@ -73,29 +70,24 @@ export default function Navigation() {
             })}
           </div>
 
-          {/* Right side actions */}
           <div className="flex items-center space-x-3">
             <LanguageToggle />
             
-            {/* Mobile menu button */}
             <Button
               variant="ghost"
               size="sm"
               className="md:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              data-testid="mobile-menu-toggle"
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
 
-            {/* Profile */}
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
               <span className="text-primary-foreground text-sm font-medium">Dr</span>
             </div>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <div className="grid grid-cols-2 gap-2">
@@ -118,7 +110,6 @@ export default function Navigation() {
                       navigate(item.href);
                       setIsMobileMenuOpen(false);
                     }}
-                    data-testid={`mobile-nav-${item.name.toLowerCase().replace(' ', '-')}`}
                   >
                     <Icon className="h-4 w-4 mr-2" />
                     <span className="truncate">{item.name}</span>
