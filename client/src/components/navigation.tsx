@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Stethoscope, Menu, X } from "lucide-react";
 
 interface NavigationProps {
   currentPage: string;
@@ -22,59 +21,78 @@ export default function Navigation({ currentPage, setPage }: NavigationProps) {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNavClick("/")}>
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Stethoscope className="text-white h-6 w-6" />
+    <nav style={{ backgroundColor: "#fff", borderBottom: "1px solid #e5e7eb", boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)", position: "sticky", top: 0, zIndex: 50 }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "64px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => handleNavClick("/")}>
+            <div style={{ backgroundColor: "#2563eb", padding: "8px", borderRadius: "8px" }}>
+              <span style={{ color: "#fff", fontSize: "20px" }}>🏥</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">VetFlow</h1>
-              <p className="text-xs text-gray-500">Veterinary Automation</p>
+              <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#111", margin: 0 }}>VetFlow</h1>
+              <p style={{ fontSize: "12px", color: "#999", margin: 0 }}>Veterinary Automation</p>
             </div>
           </div>
 
-          <div className="hidden md:flex gap-1">
+          <div style={{ display: "none" }} className="md:flex gap-1">
             {items.map((item) => (
               <button
                 key={item.path}
                 onClick={() => handleNavClick(item.path)}
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  currentPage === item.path
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: currentPage === item.path ? "#2563eb" : "transparent",
+                  color: currentPage === item.path ? "#fff" : "#374151",
+                }}
               >
                 {item.name}
               </button>
             ))}
           </div>
 
-          <div className="flex md:hidden gap-2">
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 hover:bg-gray-100 rounded-md"
+              style={{
+                padding: "8px",
+                border: "none",
+                backgroundColor: "transparent",
+                cursor: "pointer",
+                fontSize: "20px",
+              }}
             >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileOpen ? "✕" : "☰"}
             </button>
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-bold">Dr</span>
+            <div style={{ width: "32px", height: "32px", backgroundColor: "#2563eb", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontSize: "12px", fontWeight: "bold" }}>Dr</span>
             </div>
           </div>
         </div>
 
         {mobileOpen && (
-          <div className="md:hidden py-3 border-t border-gray-200 space-y-2">
+          <div style={{ paddingBottom: "12px", borderTop: "1px solid #e5e7eb" }}>
             {items.map((item) => (
               <button
                 key={item.path}
                 onClick={() => handleNavClick(item.path)}
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-                  currentPage === item.path
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  border: "none",
+                  cursor: "pointer",
+                  marginBottom: "8px",
+                  backgroundColor: currentPage === item.path ? "#2563eb" : "transparent",
+                  color: currentPage === item.path ? "#fff" : "#374151",
+                }}
               >
                 {item.name}
               </button>
