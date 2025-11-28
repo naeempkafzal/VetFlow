@@ -18,7 +18,7 @@ import {
   Plus,
   ArrowRight,
 } from "lucide-react";
-import { Link } from "react-router-dom"; // Changed from wouter to react-router-dom
+import { Link } from "wouter";
 
 interface DashboardStats {
   totalAnimals: number;

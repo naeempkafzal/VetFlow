@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link } from "wouter";
 
-const Appointments: React.FC = () => {
+const Appointments = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [newAppointment, setNewAppointment] = useState({
     date: "",

@@ -1,32 +1,32 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Replaced wouter with react-router-dom
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "../components/ui/toaster"; // Adjusted import path
-import { TooltipProvider } from "../components/ui/tooltip"; // Adjusted import path
-import NotFound from "./pages/not-found"; // Adjusted import path
-import Dashboard from "./pages/dashboard"; // Adjusted import path
-import SymptomChecker from "./pages/symptom-checker"; // Adjusted import path
-import Records from "./pages/records"; // Adjusted import path
-import Vaccinations from "./pages/vaccinations"; // Adjusted import path
-import Inventory from "./pages/inventory"; // Adjusted import path
-import Appointments from "./pages/appointments"; // Adjusted import path
-import Outbreaks from "./pages/outbreaks"; // Adjusted import path
-import Analytics from "./pages/analytics"; // Adjusted import path
-import Navigation from "../components/navigation"; // Adjusted import path
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "@/pages/not-found";
+import Dashboard from "@/pages/dashboard";
+import SymptomChecker from "@/pages/symptom-checker";
+import Records from "@/pages/records";
+import Vaccinations from "@/pages/vaccinations";
+import Inventory from "@/pages/inventory";
+import Appointments from "@/pages/appointments";
+import Outbreaks from "@/pages/outbreaks";
+import Analytics from "@/pages/analytics";
+import Navigation from "@/components/navigation";
 
 function AppRouter() {
   return (
-    <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/symptom-checker" element={<SymptomChecker />} />
-      <Route path="/records" element={<Records />} />
-      <Route path="/vaccinations" element={<Vaccinations />} />
-      <Route path="/inventory" element={<Inventory />} />
-      <Route path="/appointments" element={<Appointments />} />
-      <Route path="/outbreaks" element={<Outbreaks />} />
-      <Route path="/analytics" element={<Analytics />} />
-      <Route path="*" element={<NotFound />} /> {/* Catch-all for 404 */}
-    </Routes>
+    <Switch>
+      <Route path="/" component={Dashboard} />
+      <Route path="/symptom-checker" component={SymptomChecker} />
+      <Route path="/records" component={Records} />
+      <Route path="/vaccinations" component={Vaccinations} />
+      <Route path="/inventory" component={Inventory} />
+      <Route path="/appointments" component={Appointments} />
+      <Route path="/outbreaks" component={Outbreaks} />
+      <Route path="/analytics" component={Analytics} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
