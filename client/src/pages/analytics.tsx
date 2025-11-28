@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { useTranslation } from "../lib/translations";
-import { Animal, VisitRecord, Vaccination } from "../../shared/schema"; // Adjust path as needed
+import { Animal, VisitRecord, Vaccination } from "../../shared/schema";
 import {
   BarChart3,
   TrendingUp,
@@ -35,7 +35,7 @@ interface ProductivityMetrics {
   baselineProductivity: number;
   currentProductivity: number;
   lossPercentage: number;
-  estimatedLoss: number; // in PKR
+  estimatedLoss: number;
   illnessDays: number;
 }
 
@@ -79,7 +79,6 @@ export default function Analytics() {
     retry: false,
   });
 
-  // Calculate farm productivity metrics
   const productivityMetrics = useMemo((): ProductivityMetrics[] => {
     return animals
       .filter(
@@ -102,7 +101,7 @@ export default function Analytics() {
           return visitDate >= cutoffDate;
         });
 
-        const baselineDaily = animal.species === "cow" ? 15 : 12; // Average for local breeds
+        const baselineDaily = animal.species === "cow" ? 15 : 12;
         const illnessDays = recentVisits.reduce((total, visit) => {
           if (visit.diagnosis?.toLowerCase().includes("mastitis"))
             return total + 7;
@@ -110,7 +109,7 @@ export default function Analytics() {
             return total + 3;
           if (visit.diagnosis?.toLowerCase().includes("septicaemia"))
             return total + 14;
-          return total + 2; // Default illness duration
+          return total + 2;
         }, 0);
 
         const productivityLoss =
@@ -119,7 +118,7 @@ export default function Analytics() {
         const lossPercentage =
           ((baselineDaily - currentDaily) / baselineDaily) * 100;
         const estimatedLoss =
-          (baselineDaily - currentDaily) * 120 * illnessDays; // PKR 120/liter
+          (baselineDaily - currentDaily) * 120 * illnessDays;
 
         return {
           animalId: animal.id,
@@ -138,7 +137,6 @@ export default function Analytics() {
       );
   }, [animals, visitRecords, selectedTimeframe, selectedSpecies]);
 
-  // Calculate pet welfare scores
   const welfareScores = useMemo((): WelfareScore[] => {
     return animals
       .filter((animal) => animal.species === "dog" || animal.species === "cat")
@@ -229,7 +227,6 @@ export default function Analytics() {
       );
   }, [animals, visitRecords, vaccinations, selectedSpecies]);
 
-  // Calculate AMR risk assessment
   const amrRisks = useMemo((): AMRRisk[] => {
     return animals
       .map((animal) => {
@@ -327,23 +324,23 @@ export default function Analytics() {
   const getRiskColor = (level: string) => {
     switch (level) {
       case "critical":
-        return "text-red-600 bg-red-50 border-red-200";
+        return { color: "#dc2626", backgroundColor: "#fef2f2", borderColor: "#fecaca" };
       case "high":
-        return "text-orange-600 bg-orange-50 border-orange-200";
+        return { color: "#ea580c", backgroundColor: "#fff7ed", borderColor: "#fed7aa" };
       case "medium":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+        return { color: "#ca8a04", backgroundColor: "#fefce8", borderColor: "#fef08a" };
       case "low":
-        return "text-green-600 bg-green-50 border-green-200";
+        return { color: "#16a34a", backgroundColor: "#f0fdf4", borderColor: "#dcfce7" };
       default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
+        return { color: "#4b5563", backgroundColor: "#f9fafb", borderColor: "#e5e7eb" };
     }
   };
 
   const getWelfareColor = (score: number) => {
-    if (score >= 80) return "text-green-600 bg-green-50";
-    if (score >= 60) return "text-yellow-600 bg-yellow-50";
-    if (score >= 40) return "text-orange-600 bg-orange-50";
-    return "text-red-600 bg-red-50";
+    if (score >= 80) return { color: "#16a34a", backgroundColor: "#f0fdf4" };
+    if (score >= 60) return { color: "#ca8a04", backgroundColor: "#fefce8" };
+    if (score >= 40) return { color: "#ea580c", backgroundColor: "#fff7ed" };
+    return { color: "#dc2626", backgroundColor: "#fef2f2" };
   };
 
   const totalProductivityLoss = productivityMetrics.reduce(
@@ -360,25 +357,25 @@ export default function Analytics() {
   ).length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 16px" }}>
+      <div style={{ marginBottom: "32px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <h1 style={{ fontSize: "30px", fontWeight: "bold", color: "#1f2937", marginBottom: "8px" }}>
               {t("analytics.title") || "Analytics Dashboard"}
             </h1>
-            <p className="text-gray-600">
+            <p style={{ color: "#4b5563" }}>
               {language === "ur"
                 ? "فارم کی پیداوار، جانوروں کی فلاح اور AMR خطرے کا تجزیہ"
                 : "Farm productivity, animal welfare, and AMR risk analysis"}
             </p>
           </div>
-          <div className="mt-4 md:mt-0 flex gap-3">
+          <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
             <Select
               value={selectedTimeframe}
               onValueChange={setSelectedTimeframe}
             >
-              <SelectTrigger className="w-40" data-testid="timeframe-select">
+              <SelectTrigger style={{ width: "160px" }} data-testid="timeframe-select">
                 <SelectValue placeholder="Select Timeframe" />
               </SelectTrigger>
               <SelectContent>
@@ -389,7 +386,7 @@ export default function Analytics() {
             </Select>
             <Select value={selectedSpecies} onValueChange={setSelectedSpecies}>
               <SelectTrigger
-                className="w-40"
+                style={{ width: "160px" }}
                 data-testid="species-filter-select"
               >
                 <SelectValue placeholder="Select Species" />
@@ -407,89 +404,91 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px", marginBottom: "32px" }}>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent style={{ padding: "24px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <p className="text-sm text-gray-600">
+                <p style={{ fontSize: "14px", color: "#4b5563" }}>
                   {language === "ur"
                     ? "کل پیداوار کا نقصان"
                     : "Total Productivity Loss"}
                 </p>
-                <p className="text-2xl font-bold text-red-600">
+                <p style={{ fontSize: "24px", fontWeight: "bold", color: "#dc2626" }}>
                   PKR {totalProductivityLoss.toLocaleString()}
                 </p>
-                <p className="text-xs text-gray-600 mt-1">
+                <p style={{ fontSize: "12px", color: "#4b5563", marginTop: "4px" }}>
                   {language === "ur" ? "اس مدت میں" : "In selected period"}
                 </p>
               </div>
-              <div className="bg-red-50 p-3 rounded-lg">
-                <TrendingDown className="h-6 w-6 text-red-600" />
+              <div style={{ backgroundColor: "#fef2f2", padding: "12px", borderRadius: "8px" }}>
+                <TrendingDown style={{ height: "24px", width: "24px", color: "#dc2626" }} />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent style={{ padding: "24px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <p className="text-sm text-gray-600">
+                <p style={{ fontSize: "14px", color: "#4b5563" }}>
                   {language === "ur"
                     ? "اوسط فلاحی اسکور"
                     : "Average Welfare Score"}
                 </p>
                 <p
-                  className={`text-2xl font-bold ${averageWelfareScore >= 70 ? "text-green-600" : "text-orange-600"}`}
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    color: averageWelfareScore >= 70 ? "#16a34a" : "#ea580c",
+                  }}
                 >
                   {averageWelfareScore.toFixed(1)}/100
                 </p>
-                <p className="text-xs text-gray-600 mt-1">
+                <p style={{ fontSize: "12px", color: "#4b5563", marginTop: "4px" }}>
                   {language === "ur" ? "پالتو جانوروں کے لیے" : "For pets"}
                 </p>
               </div>
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <Heart className="h-6 w-6 text-blue-600" />
+              <div style={{ backgroundColor: "#eff6ff", padding: "12px", borderRadius: "8px" }}>
+                <Heart style={{ height: "24px", width: "24px", color: "#2563eb" }} />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent style={{ padding: "24px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <p className="text-sm text-gray-600">
+                <p style={{ fontSize: "14px", color: "#4b5563" }}>
                   {language === "ur" ? "زیادہ AMR خطرہ" : "High AMR Risk"}
                 </p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p style={{ fontSize: "24px", fontWeight: "bold", color: "#ea580c" }}>
                   {highRiskAnimals}
                 </p>
-                <p className="text-xs text-gray-600 mt-1">
+                <p style={{ fontSize: "12px", color: "#4b5563", marginTop: "4px" }}>
                   {language === "ur" ? "جانور" : "Animals"}
                 </p>
               </div>
-              <div className="bg-orange-50 p-3 rounded-lg">
-                <Shield className="h-6 w-6 text-orange-600" />
+              <div style={{ backgroundColor: "#fff7ed", padding: "12px", borderRadius: "8px" }}>
+                <Shield style={{ height: "24px", width: "24px", color: "#ea580c" }} />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Farm Productivity Analysis */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "24px" }}>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calculator className="h-5 w-5 mr-2 text-blue-600" />
+            <CardTitle style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Calculator style={{ height: "20px", width: "20px", color: "#2563eb" }} />
               {t("analytics.productivity") || "Productivity Analysis"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {productivityMetrics.length > 0 ? (
                 productivityMetrics
                   .sort((a, b) => b.estimatedLoss - a.estimatedLoss)
@@ -497,62 +496,59 @@ export default function Analytics() {
                   .map((metric, index) => (
                     <div
                       key={metric.animalId}
-                      className="p-4 border rounded-lg bg-white"
+                      style={{ padding: "16px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#fff" }}
                       data-testid={`productivity-${index}`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-800">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <h4 style={{ fontWeight: "500", color: "#1f2937" }}>
                           {metric.animalName}
                         </h4>
-                        <Badge
-                          variant="outline"
-                          className="capitalize text-gray-600"
-                        >
+                        <Badge style={{ textTransform: "capitalize", color: "#4b5563" }}>
                           {metric.species}
                         </Badge>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "16px", fontSize: "14px" }}>
                         <div>
-                          <span className="text-gray-600">
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur"
                               ? "بنیادی پیداوار:"
                               : "Baseline:"}
                           </span>
-                          <p className="font-medium text-gray-800">
+                          <p style={{ fontWeight: "500", color: "#1f2937" }}>
                             {metric.baselineProductivity} L/day
                           </p>
                         </div>
                         <div>
-                          <span className="text-gray-600">
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur" ? "موجودہ پیداوار:" : "Current:"}
                           </span>
-                          <p className="font-medium text-gray-800">
+                          <p style={{ fontWeight: "500", color: "#1f2937" }}>
                             {metric.currentProductivity.toFixed(1)} L/day
                           </p>
                         </div>
                         <div>
-                          <span className="text-gray-600">
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur" ? "نقصان:" : "Loss:"}
                           </span>
-                          <p className="font-medium text-red-600">
+                          <p style={{ fontWeight: "500", color: "#dc2626" }}>
                             {metric.lossPercentage.toFixed(1)}%
                           </p>
                         </div>
                         <div>
-                          <span className="text-gray-600">
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur"
                               ? "مالی نقصان:"
                               : "Financial Loss:"}
                           </span>
-                          <p className="font-medium text-red-600">
+                          <p style={{ fontWeight: "500", color: "#dc2626" }}>
                             PKR {metric.estimatedLoss.toLocaleString()}
                           </p>
                         </div>
                       </div>
 
                       {metric.illnessDays > 0 && (
-                        <p className="text-xs text-gray-600 mt-2">
+                        <p style={{ fontSize: "12px", color: "#4b5563", marginTop: "8px" }}>
                           {language === "ur"
                             ? `بیماری کے دن: ${metric.illnessDays}`
                             : `Illness days: ${metric.illnessDays}`}
@@ -561,7 +557,7 @@ export default function Analytics() {
                     </div>
                   ))
               ) : (
-                <p className="text-gray-600 text-center py-8">
+                <p style={{ color: "#4b5563", textAlign: "center", padding: "32px 0" }}>
                   {language === "ur"
                     ? "کوئی دودھ دینے والے جانور کا ڈیٹا دستیاب نہیں"
                     : "No dairy animal data available"}
@@ -571,16 +567,15 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Pet Welfare Scores */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Heart className="h-5 w-5 mr-2 text-blue-600" />
+            <CardTitle style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Heart style={{ height: "20px", width: "20px", color: "#2563eb" }} />
               {t("analytics.welfare") || "Welfare Scores"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {welfareScores.length > 0 ? (
                 welfareScores
                   .sort((a, b) => a.score - b.score)
@@ -588,29 +583,26 @@ export default function Analytics() {
                   .map((welfare, index) => (
                     <div
                       key={welfare.animalId}
-                      className="p-4 border rounded-lg bg-white"
+                      style={{ padding: "16px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#fff" }}
                       data-testid={`welfare-${index}`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-800">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <h4 style={{ fontWeight: "500", color: "#1f2937" }}>
                           {welfare.animalName}
                         </h4>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getWelfareColor(welfare.score)}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <Badge style={getWelfareColor(welfare.score)}>
                             {welfare.score.toFixed(0)}/100
                           </Badge>
-                          <Badge
-                            variant="outline"
-                            className="capitalize text-gray-600"
-                          >
+                          <Badge style={{ textTransform: "capitalize", color: "#4b5563" }}>
                             {welfare.species}
                           </Badge>
                         </div>
                       </div>
 
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur" ? "آخری ملاقات:" : "Last Visit:"}
                           </span>
                           <span>
@@ -621,20 +613,13 @@ export default function Analytics() {
                                 : "No record"}
                           </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur" ? "ویکسینیشن:" : "Vaccination:"}
                           </span>
-                          <Badge
-                            variant="outline"
-                            className={
-                              welfare.vaccinationStatus === "up-to-date"
-                                ? "text-green-600"
-                                : welfare.vaccinationStatus === "overdue"
-                                  ? "text-orange-600"
-                                  : "text-red-600"
-                            }
-                          >
+                          <Badge style={{
+                            color: welfare.vaccinationStatus === "up-to-date" ? "#16a34a" : welfare.vaccinationStatus === "overdue" ? "#ea580c" : "#dc2626"
+                          }}>
                             {welfare.vaccinationStatus === "up-to-date" &&
                               (language === "ur" ? "اپ ٹو ڈیٹ" : "Up to date")}
                             {welfare.vaccinationStatus === "overdue" &&
@@ -643,20 +628,18 @@ export default function Analytics() {
                               (language === "ur" ? "کوئی نہیں" : "None")}
                           </Badge>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur"
                               ? "صحت کا رجحان:"
                               : "Health Trend:"}
                           </span>
                           <span
-                            className={`text-sm font-medium ${
-                              welfare.healthTrend === "improving"
-                                ? "text-green-600"
-                                : welfare.healthTrend === "stable"
-                                  ? "text-blue-600"
-                                  : "text-red-600"
-                            }`}
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              color: welfare.healthTrend === "improving" ? "#16a34a" : welfare.healthTrend === "stable" ? "#2563eb" : "#dc2626"
+                            }}
                           >
                             {welfare.healthTrend === "improving" &&
                               (language === "ur" ? "بہتری" : "Improving")}
@@ -670,7 +653,7 @@ export default function Analytics() {
                     </div>
                   ))
               ) : (
-                <p className="text-gray-600 text-center py-8">
+                <p style={{ color: "#4b5563", textAlign: "center", padding: "32px 0" }}>
                   {language === "ur"
                     ? "کوئی پالتو جانور کا ڈیٹا دستیاب نہیں"
                     : "No pet data available"}
@@ -680,16 +663,15 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* AMR Risk Assessment */}
-        <Card className="lg:col-span-2">
+        <Card style={{ gridColumn: "span 2" }}>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Shield className="h-5 w-5 mr-2 text-blue-600" />
+            <CardTitle style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Shield style={{ height: "20px", width: "20px", color: "#2563eb" }} />
               {t("analytics.amr") || "AMR Risk Assessment"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
               {amrRisks.length > 0 ? (
                 amrRisks
                   .filter((risk) => risk.riskLevel !== "low")
@@ -706,42 +688,45 @@ export default function Analytics() {
                   .map((risk, index) => (
                     <div
                       key={risk.animalId}
-                      className="p-4 border rounded-lg bg-white"
+                      style={{ padding: "16px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#fff" }}
                       data-testid={`amr-risk-${index}`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-800">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <h4 style={{ fontWeight: "500", color: "#1f2937" }}>
                           {risk.animalName}
                         </h4>
-                        <Badge className={getRiskColor(risk.riskLevel)}>
+                        <Badge style={{
+                          ...getRiskColor(risk.riskLevel),
+                          border: `1px solid ${getRiskColor(risk.riskLevel).borderColor}`
+                        }}>
                           {risk.riskLevel.toUpperCase()}
                         </Badge>
                       </div>
 
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "14px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur"
                               ? "اینٹی بائیوٹک کا استعمال:"
                               : "Antibiotic Treatments:"}
                           </span>
-                          <span className="font-medium text-gray-800">
+                          <span style={{ fontWeight: "500", color: "#1f2937" }}>
                             {risk.antibioticTreatments}
                           </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ color: "#4b5563" }}>
                             {language === "ur"
                               ? "دوبارہ علاج:"
                               : "Repeated Treatments:"}
                           </span>
-                          <span className="font-medium text-gray-800">
+                          <span style={{ fontWeight: "500", color: "#1f2937" }}>
                             {risk.repeatedTreatments}
                           </span>
                         </div>
                         {risk.lastTreatmentDate && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span style={{ color: "#4b5563" }}>
                               {language === "ur"
                                 ? "آخری علاج:"
                                 : "Last Treatment:"}
@@ -753,18 +738,17 @@ export default function Analytics() {
                         )}
 
                         {risk.riskFactors.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-xs text-gray-600 mb-1">
+                          <div style={{ marginTop: "8px" }}>
+                            <p style={{ fontSize: "12px", color: "#4b5563", marginBottom: "4px" }}>
                               {language === "ur"
                                 ? "خطرے کے عوامل:"
                                 : "Risk Factors:"}
                             </p>
-                            <div className="flex flex-wrap gap-1">
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                               {risk.riskFactors.map((factor, factorIndex) => (
                                 <Badge
                                   key={factorIndex}
-                                  variant="outline"
-                                  className="text-xs text-gray-600"
+                                  style={{ fontSize: "12px", color: "#4b5563" }}
                                 >
                                   {factor}
                                 </Badge>
@@ -776,8 +760,8 @@ export default function Analytics() {
                     </div>
                   ))
               ) : (
-                <div className="col-span-2">
-                  <p className="text-gray-600 text-center py-8">
+                <div style={{ gridColumn: "span 2" }}>
+                  <p style={{ color: "#4b5563", textAlign: "center", padding: "32px 0" }}>
                     {language === "ur"
                       ? "کوئی AMR خطرے کا ڈیٹا دستیاب نہیں"
                       : "No AMR risk data available"}
@@ -787,7 +771,7 @@ export default function Analytics() {
             </div>
 
             {amrRisks.filter((risk) => risk.riskLevel !== "low").length > 6 && (
-              <div className="mt-4 text-center">
+              <div style={{ marginTop: "16px", textAlign: "center" }}>
                 <Button variant="outline" size="sm" data-testid="view-more-amr">
                   {language === "ur" ? "مزید دیکھیں" : "View More"}
                 </Button>
@@ -797,24 +781,23 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Recommendations */}
-      <Card className="mt-6">
+      <Card style={{ marginTop: "24px" }}>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <TrendingUp className="h-5 w-5 mr-2 text-blue-600" />
+          <CardTitle style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <TrendingUp style={{ height: "20px", width: "20px", color: "#2563eb" }} />
             {language === "ur" ? "سفارشات" : "Recommendations"}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
             {totalProductivityLoss > 10000 && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h4 className="font-medium text-red-800 mb-2">
+              <div style={{ padding: "16px", backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px" }}>
+                <h4 style={{ fontWeight: "500", color: "#991b1b", marginBottom: "8px" }}>
                   {language === "ur"
                     ? "پیداوار میں بہتری"
                     : "Productivity Improvement"}
                 </h4>
-                <p className="text-sm text-red-700">
+                <p style={{ fontSize: "14px", color: "#b91c1c" }}>
                   {language === "ur"
                     ? "ماسٹائٹس کی روک تھام پر توجہ دیں اور حفظان صحت بہتر بنائیں"
                     : "Focus on mastitis prevention and improve hygiene protocols"}
@@ -823,11 +806,11 @@ export default function Analytics() {
             )}
 
             {averageWelfareScore < 70 && (
-              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                <h4 className="font-medium text-orange-800 mb-2">
+              <div style={{ padding: "16px", backgroundColor: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "8px" }}>
+                <h4 style={{ fontWeight: "500", color: "#92400e", marginBottom: "8px" }}>
                   {language === "ur" ? "فلاحی بہتری" : "Welfare Improvement"}
                 </h4>
-                <p className="text-sm text-orange-700">
+                <p style={{ fontSize: "14px", color: "#b45309" }}>
                   {language === "ur"
                     ? "باقاعدہ ویکسینیشن اور چیک اپ کا شیڈول بنائیں"
                     : "Schedule regular vaccinations and health checkups"}
@@ -836,11 +819,11 @@ export default function Analytics() {
             )}
 
             {highRiskAnimals > 0 && (
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="font-medium text-yellow-800 mb-2">
+              <div style={{ padding: "16px", backgroundColor: "#fefce8", border: "1px solid #fef08a", borderRadius: "8px" }}>
+                <h4 style={{ fontWeight: "500", color: "#713f12", marginBottom: "8px" }}>
                   {language === "ur" ? "AMR کا انتظام" : "AMR Management"}
                 </h4>
-                <p className="text-sm text-yellow-700">
+                <p style={{ fontSize: "14px", color: "#854d0e" }}>
                   {language === "ur"
                     ? "اینٹی بائیوٹک کا محتاط استعمال اور کلچر ٹیسٹ کروائیں"
                     : "Practice prudent antibiotic use and conduct culture tests"}
