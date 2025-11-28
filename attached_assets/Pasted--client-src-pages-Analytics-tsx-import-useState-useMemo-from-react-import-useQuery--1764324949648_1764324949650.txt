@@ -1,0 +1,1049 @@
+// client/src/pages/Analytics.tsx
+
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { useTranslation } from "../lib/translations";
+import { Animal, VisitRecord, Vaccination } from "../../shared/schema"; // Adjust path as needed
+import {
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  Heart,
+  Shield,
+  Calculator,
+  Calendar,
+} from "lucide-react";
+
+// --- STYLE DEFINITIONS ---
+const styles = {
+  // Layout
+  container: {
+    maxWidth: "1280px",
+    margin: "0 auto",
+    padding: "32px 16px", // py-8, px-4 sm:px-6 lg:px-8
+  },
+  headerGroup: {
+    marginBottom: "32px",
+  },
+  headerFlex: {
+    display: "flex",
+    flexDirection: "column" as "column",
+    alignItems: "stretch",
+    justifyContent: "space-between",
+  },
+  sectionGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(1, 1fr)",
+    gap: "24px", // gap-6
+    marginBottom: "32px",
+  },
+  cardContent: {
+    padding: "24px", // p-6
+  },
+  flexSpaceBetween: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  flexGap3: {
+    display: "flex",
+    gap: "12px", // gap-3
+    marginTop: "16px", // mt-4
+  },
+  // Typography
+  h1: {
+    fontSize: "1.875rem", // text-3xl
+    fontWeight: "700", // font-bold
+    color: "#1f2937", // text-gray-800
+    marginBottom: "8px", // mb-2
+  },
+  pSubtitle: {
+    color: "#4b5563", // text-gray-600
+  },
+  pSmall: {
+    fontSize: "0.875rem", // text-sm
+    color: "#4b5563", // text-gray-600
+  },
+  pExtraSmall: {
+    fontSize: "0.75rem", // text-xs
+    color: "#4b5563", // text-gray-600
+    marginTop: "4px", // mt-1
+  },
+  pLargeRed: {
+    fontSize: "1.5rem", // text-2xl
+    fontWeight: "700", // font-bold
+    color: "#dc2626", // text-red-600
+  },
+  iconBox: {
+    backgroundColor: "#fef2f2", // bg-red-50
+    padding: "12px", // p-3
+    borderRadius: "8px", // rounded-lg
+  },
+  // List Items
+  listItem: {
+    padding: "16px", // p-4
+    border: "1px solid #e5e7eb", // border
+    borderRadius: "8px", // rounded-lg
+    backgroundColor: "#fff", // bg-white
+  },
+  listItemHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "8px",
+  },
+  listItemTitle: {
+    fontWeight: "500", // font-medium
+    color: "#1f2937", // text-gray-800
+  },
+  // Utility Colors/States
+  redColor: { color: "#dc2626" },
+  greenColor: { color: "#10b981" },
+  blueColor: { color: "#2563eb" },
+  orangeColor: { color: "#f97316" },
+  centerText: { textAlign: "center" as "center", padding: "32px 0" },
+  // Recommendations
+  recRed: {
+    padding: "16px",
+    backgroundColor: "#fef2f2",
+    border: "1px solid #fecaca",
+    borderRadius: "8px",
+  },
+  recOrange: {
+    padding: "16px",
+    backgroundColor: "#fff7ed",
+    border: "1px solid #fed7aa",
+    borderRadius: "8px",
+  },
+  recTitleRed: {
+    fontWeight: "500",
+    color: "#991b1b",
+    marginBottom: "8px",
+  },
+  recTextRed: {
+    fontSize: "0.875rem",
+    color: "#b91c1c",
+  },
+};
+
+// Media Queries for Responsiveness (can be moved to a separate hook/file for scalability)
+const applyResponsiveStyles = (baseStyle: React.CSSProperties, isWide: boolean): React.CSSProperties => {
+  if (isWide) {
+    if (baseStyle === styles.headerFlex) {
+      return {
+        ...baseStyle,
+        flexDirection: "row",
+      };
+    }
+    if (baseStyle === styles.sectionGrid) {
+      return {
+        ...baseStyle,
+        gridTemplateColumns: "repeat(3, 1fr)",
+      };
+    }
+  }
+  return baseStyle;
+};
+
+// --- COMPONENT LOGIC ---
+
+interface ProductivityMetrics {
+  animalId: string;
+  animalName: string;
+  species: string;
+  baselineProductivity: number;
+  currentProductivity: number;
+  lossPercentage: number;
+  estimatedLoss: number; // in PKR
+  illnessDays: number;
+}
+
+interface WelfareScore {
+  animalId: string;
+  animalName: string;
+  species: string;
+  score: number;
+  lastVisit?: Date;
+  vaccinationStatus: "up-to-date" | "overdue" | "none";
+  healthTrend: "improving" | "stable" | "declining";
+}
+
+interface AMRRisk {
+  animalId: string;
+  animalName: string;
+  riskLevel: "low" | "medium" | "high" | "critical";
+  antibioticTreatments: number;
+  repeatedTreatments: number;
+  lastTreatmentDate?: Date;
+  riskFactors: string[];
+}
+
+export default function Analytics() {
+  // Simple check for large screen layout (md: or lg: equivalent)
+  const isLargeScreen = window.innerWidth >= 1024;
+  const isMediumScreen = window.innerWidth >= 768;
+
+  const { t, language } = useTranslation();
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>("3months");
+  const [selectedSpecies, setSelectedSpecies] = useState<string>("all");
+
+  // Query Hooks (left unchanged as they manage data fetching)
+  const { data: animals = [] } = useQuery<Animal[]>({
+    queryKey: ["http://localhost:5001/api/animals"],
+    retry: false,
+  });
+
+  const { data: visitRecords = [] } = useQuery<VisitRecord[]>({
+    queryKey: ["http://localhost:5001/api/visit-records"],
+    retry: false,
+  });
+
+  const { data: vaccinations = [] } = useQuery<Vaccination[]>({
+    queryKey: ["http://localhost:5001/api/vaccinations"],
+    retry: false,
+  });
+
+  // --- CALCULATIONS (UNCHANGED) ---
+
+  const productivityMetrics = useMemo(
+    (): ProductivityMetrics[] => {
+      return animals
+        .filter(
+          (animal) => animal.species === "cow" || animal.species === "buffalo",
+        )
+        .map((animal) => {
+          const animalVisits = visitRecords.filter(
+            (visit) => visit.animalId === animal.id,
+          );
+          const recentVisits = animalVisits.filter((visit) => {
+            const visitDate = new Date(visit.visitDate);
+            const timeframeDays =
+              selectedTimeframe === "1month"
+                ? 30
+                : selectedTimeframe === "3months"
+                  ? 90
+                  : 365;
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - timeframeDays);
+            return visitDate >= cutoffDate;
+          });
+
+          const baselineDaily = animal.species === "cow" ? 15 : 12;
+          const illnessDays = recentVisits.reduce((total, visit) => {
+            if (visit.diagnosis?.toLowerCase().includes("mastitis"))
+              return total + 7;
+            if (visit.diagnosis?.toLowerCase().includes("fever"))
+              return total + 3;
+            if (visit.diagnosis?.toLowerCase().includes("septicaemia"))
+              return total + 14;
+            return total + 2;
+          }, 0);
+
+          const productivityLoss =
+            illnessDays > 0 ? Math.min(illnessDays * 0.3, 0.8) : 0;
+          const currentDaily = baselineDaily * (1 - productivityLoss);
+          const lossPercentage =
+            ((baselineDaily - currentDaily) / baselineDaily) * 100;
+          const estimatedLoss =
+            (baselineDaily - currentDaily) * 120 * illnessDays;
+
+          return {
+            animalId: animal.id,
+            animalName: animal.name,
+            species: animal.species,
+            baselineProductivity: baselineDaily,
+            currentProductivity: currentDaily,
+            lossPercentage,
+            estimatedLoss,
+            illnessDays,
+          };
+        })
+        .filter(
+          (metric) =>
+            selectedSpecies === "all" || metric.species === selectedSpecies,
+        );
+    },
+    [animals, visitRecords, selectedTimeframe, selectedSpecies],
+  );
+
+  const welfareScores = useMemo(
+    (): WelfareScore[] => {
+      return animals
+        .filter((animal) => animal.species === "dog" || animal.species === "cat")
+        .map((animal) => {
+          const animalVisits = visitRecords.filter(
+            (visit) => visit.animalId === animal.id,
+          );
+          const animalVaccinations = vaccinations.filter(
+            (vacc) => vacc.animalId === animal.id,
+          );
+
+          let score = 100;
+          const lastVisit = animalVisits.sort(
+            (a, b) =>
+              new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
+          )[0];
+
+          if (!lastVisit) {
+            score -= 30;
+          } else {
+            const daysSinceVisit = Math.floor(
+              (new Date().getTime() - new Date(lastVisit.visitDate).getTime()) /
+                (1000 * 60 * 60 * 24),
+            );
+            if (daysSinceVisit > 365) score -= 25;
+            else if (daysSinceVisit > 180) score -= 15;
+          }
+
+          const rabiesVacc = animalVaccinations.find((v) =>
+            v.vaccineName.includes("Rabies"),
+          );
+          let vaccinationStatus: "up-to-date" | "overdue" | "none" = "none";
+
+          if (rabiesVacc) {
+            const daysSinceVacc = Math.floor(
+              (new Date().getTime() - new Date(rabiesVacc.dateGiven).getTime()) /
+                (1000 * 60 * 60 * 24),
+            );
+            if (daysSinceVacc <= 365) {
+              vaccinationStatus = "up-to-date";
+            } else {
+              vaccinationStatus = "overdue";
+              score -= 20;
+            }
+          } else {
+            score -= 30;
+          }
+
+          const recentVisits = animalVisits.slice(0, 3);
+          let healthTrend: "improving" | "stable" | "declining" = "stable";
+
+          if (recentVisits.length >= 2) {
+            const hasImprovement =
+              recentVisits[0].diagnosis?.toLowerCase().includes("healthy") ||
+              recentVisits[0].diagnosis?.toLowerCase().includes("recovered");
+            const hadIssues =
+              recentVisits[1].diagnosis?.toLowerCase().includes("sick") ||
+              recentVisits[1].diagnosis?.toLowerCase().includes("infection");
+
+            if (hasImprovement && hadIssues) {
+              healthTrend = "improving";
+              score += 5;
+            } else if (
+              recentVisits.every(
+                (visit) =>
+                  visit.diagnosis?.toLowerCase().includes("sick") ||
+                  visit.diagnosis?.toLowerCase().includes("infection"),
+              )
+            ) {
+              healthTrend = "declining";
+              score -= 15;
+            }
+          }
+
+          return {
+            animalId: animal.id,
+            animalName: animal.name,
+            species: animal.species,
+            score: Math.max(0, Math.min(100, score)),
+            lastVisit: lastVisit ? new Date(lastVisit.visitDate) : undefined,
+            vaccinationStatus,
+            healthTrend,
+          };
+        })
+        .filter(
+          (welfare) =>
+            selectedSpecies === "all" || welfare.species === selectedSpecies,
+        );
+    },
+    [animals, visitRecords, vaccinations, selectedSpecies],
+  );
+
+  const amrRisks = useMemo(
+    (): AMRRisk[] => {
+      return animals
+        .map((animal) => {
+          const animalVisits = visitRecords.filter(
+            (visit) => visit.animalId === animal.id,
+          );
+
+          const antibioticTreatments = animalVisits.filter(
+            (visit) =>
+              visit.treatment?.toLowerCase().includes("antibiotic") ||
+              visit.treatment?.toLowerCase().includes("penicillin") ||
+              visit.treatment?.toLowerCase().includes("amoxicillin") ||
+              visit.medications?.toLowerCase().includes("antibiotic"),
+          ).length;
+
+          const repeatedTreatments = animalVisits.reduce(
+            (count, visit, index) => {
+              if (!visit.treatment?.toLowerCase().includes("antibiotic"))
+                return count;
+
+              const sameTypeWithin30Days = animalVisits
+                .slice(index + 1)
+                .some((otherVisit) => {
+                  const daysDiff =
+                    Math.abs(
+                      new Date(visit.visitDate).getTime() -
+                        new Date(otherVisit.visitDate).getTime(),
+                    ) /
+                    (1000 * 60 * 60 * 24);
+                  return (
+                    daysDiff <= 30 &&
+                    otherVisit.treatment?.toLowerCase().includes("antibiotic")
+                  );
+                });
+
+              return sameTypeWithin30Days ? count + 1 : count;
+            },
+            0,
+          );
+
+          const lastTreatment = animalVisits
+            .filter(
+              (visit) =>
+                visit.treatment?.toLowerCase().includes("antibiotic") ||
+                visit.medications?.toLowerCase().includes("antibiotic"),
+            )
+            .sort(
+              (a, b) =>
+                new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
+            )[0];
+
+          const riskFactors: string[] = [];
+          if (antibioticTreatments >= 5)
+            riskFactors.push("Frequent antibiotic use");
+          if (repeatedTreatments >= 2) riskFactors.push("Repeated treatments");
+          if (animal.species === "cow" || animal.species === "buffalo") {
+            if (
+              animalVisits.some((v) =>
+                v.diagnosis?.toLowerCase().includes("mastitis"),
+              )
+            ) {
+              riskFactors.push("Chronic mastitis history");
+            }
+          }
+
+          let riskLevel: "low" | "medium" | "high" | "critical" = "low";
+          if (antibioticTreatments >= 8 || repeatedTreatments >= 3) {
+            riskLevel = "critical";
+          } else if (antibioticTreatments >= 5 || repeatedTreatments >= 2) {
+            riskLevel = "high";
+          } else if (antibioticTreatments >= 3 || repeatedTreatments >= 1) {
+            riskLevel = "medium";
+          }
+
+          return {
+            animalId: animal.id,
+            animalName: animal.name,
+            riskLevel,
+            antibioticTreatments,
+            repeatedTreatments,
+            lastTreatmentDate: lastTreatment
+              ? new Date(lastTreatment.visitDate)
+              : undefined,
+            riskFactors,
+          };
+        })
+        .filter(
+          (risk) =>
+            selectedSpecies === "all" ||
+            animals.find((a) => a.id === risk.animalId)?.species ===
+              selectedSpecies,
+        );
+    },
+    [animals, visitRecords, selectedSpecies],
+  );
+
+  // --- STYLE HELPERS (CONVERTED FROM CLASSNAMES) ---
+
+  const getRiskColorStyle = (level: string): React.CSSProperties => {
+    switch (level) {
+      case "critical":
+        return {
+          color: "#dc2626", // text-red-600
+          backgroundColor: "#fef2f2", // bg-red-50
+          border: "1px solid #fecaca", // border-red-200
+        };
+      case "high":
+        return {
+          color: "#ea580c", // text-orange-600
+          backgroundColor: "#fff7ed", // bg-orange-50
+          border: "1px solid #fed7aa", // border-orange-200
+        };
+      case "medium":
+        return {
+          color: "#eab308", // text-yellow-600
+          backgroundColor: "#fefce8", // bg-yellow-50
+          border: "1px solid #fde68a", // border-yellow-200
+        };
+      case "low":
+        return {
+          color: "#10b981", // text-green-600
+          backgroundColor: "#ecfdf5", // bg-green-50
+          border: "1px solid #d1fae5", // border-green-200
+        };
+      default:
+        return {
+          color: "#4b5563", // text-gray-600
+          backgroundColor: "#f9fafb", // bg-gray-50
+          border: "1px solid #e5e7eb", // border-gray-200
+        };
+    }
+  };
+
+  const getWelfareColorStyle = (score: number): React.CSSProperties => {
+    let color = styles.redColor.color;
+    let backgroundColor = "#fef2f2";
+    
+    if (score >= 80) {
+      color = styles.greenColor.color;
+      backgroundColor = "#ecfdf5";
+    } else if (score >= 60) {
+      color = styles.orangeColor.color; // text-yellow-600
+      backgroundColor = "#fff7ed"; // bg-yellow-50
+    } else if (score >= 40) {
+      color = "#ea580c"; // text-orange-600
+      backgroundColor = "#fff7ed"; // bg-orange-50
+    }
+    
+    // Base Badge styles (removed utility classes for inline)
+    return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        borderRadius: '0.25rem',
+        padding: '0.25rem 0.5rem',
+        fontSize: '0.75rem',
+        fontWeight: '500',
+        backgroundColor: backgroundColor,
+        color: color,
+        lineHeight: '1',
+    };
+  };
+
+  const totalProductivityLoss = productivityMetrics.reduce(
+    (sum, metric) => sum + metric.estimatedLoss,
+    0,
+  );
+  const averageWelfareScore =
+    welfareScores.length > 0
+      ? welfareScores.reduce((sum, welfare) => sum + welfare.score, 0) /
+        welfareScores.length
+      : 0;
+  const highRiskAnimals = amrRisks.filter(
+    (risk) => risk.riskLevel === "high" || risk.riskLevel === "critical",
+  ).length;
+
+  // --- RENDER ---
+  return (
+    <div style={styles.container}>
+      <div style={styles.headerGroup}>
+        <div
+          style={applyResponsiveStyles(styles.headerFlex, isMediumScreen)}
+        >
+          <div>
+            <h1 style={styles.h1}>
+              {t("analytics.title") || "Analytics Dashboard"}
+            </h1>
+            <p style={styles.pSubtitle}>
+              {language === "ur"
+                ? "فارم کی پیداوار، جانوروں کی فلاح اور AMR خطرے کا تجزیہ"
+                : "Farm productivity, animal welfare, and AMR risk analysis"}
+            </p>
+          </div>
+          <div
+            style={isMediumScreen ? {...styles.flexGap3, marginTop: 0} : styles.flexGap3}
+          >
+            {/* UI Components (Assuming Card, Button, Select handle their own internal styling) */}
+            <Select
+              value={selectedTimeframe}
+              onValueChange={setSelectedTimeframe}
+            >
+              <SelectTrigger style={{ width: 160 }} data-testid="timeframe-select">
+                <SelectValue placeholder="Select Timeframe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1month">Last Month</SelectItem>
+                <SelectItem value="3months">Last 3 Months</SelectItem>
+                <SelectItem value="1year">Last Year</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedSpecies} onValueChange={setSelectedSpecies}>
+              <SelectTrigger style={{ width: 160 }} data-testid="species-filter-select">
+                <SelectValue placeholder="Select Species" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Species</SelectItem>
+                <SelectItem value="cow">Cows</SelectItem>
+                <SelectItem value="buffalo">Buffalo</SelectItem>
+                <SelectItem value="goat">Goats</SelectItem>
+                <SelectItem value="dog">Dogs</SelectItem>
+                <SelectItem value="cat">Cats</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div
+        style={applyResponsiveStyles(styles.sectionGrid, isMediumScreen)}
+      >
+        <Card>
+          <CardContent style={styles.cardContent}>
+            <div style={styles.flexSpaceBetween}>
+              <div>
+                <p style={styles.pSmall}>
+                  {language === "ur"
+                    ? "کل پیداوار کا نقصان"
+                    : "Total Productivity Loss"}
+                </p>
+                <p style={styles.pLargeRed}>
+                  PKR {totalProductivityLoss.toLocaleString()}
+                </p>
+                <p style={styles.pExtraSmall}>
+                  {language === "ur" ? "اس مدت میں" : "In selected period"}
+                </p>
+              </div>
+              <div style={{ ...styles.iconBox, backgroundColor: "#fef2f2" }}>
+                <TrendingDown style={{ height: 24, width: 24, color: styles.redColor.color }} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent style={styles.cardContent}>
+            <div style={styles.flexSpaceBetween}>
+              <div>
+                <p style={styles.pSmall}>
+                  {language === "ur"
+                    ? "اوسط فلاحی اسکور"
+                    : "Average Welfare Score"}
+                </p>
+                <p
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: "700",
+                    color: averageWelfareScore >= 70 ? styles.greenColor.color : styles.orangeColor.color,
+                  }}
+                >
+                  {averageWelfareScore.toFixed(1)}/100
+                </p>
+                <p style={styles.pExtraSmall}>
+                  {language === "ur" ? "پالتو جانوروں کے لیے" : "For pets"}
+                </p>
+              </div>
+              <div style={{ ...styles.iconBox, backgroundColor: "#eff6ff" }}>
+                <Heart style={{ height: 24, width: 24, color: styles.blueColor.color }} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent style={styles.cardContent}>
+            <div style={styles.flexSpaceBetween}>
+              <div>
+                <p style={styles.pSmall}>
+                  {language === "ur" ? "زیادہ AMR خطرہ" : "High AMR Risk"}
+                </p>
+                <p style={styles.pLargeRed}>
+                  {highRiskAnimals}
+                </p>
+                <p style={styles.pExtraSmall}>
+                  {language === "ur" ? "جانور" : "Animals"}
+                </p>
+              </div>
+              <div style={{ ...styles.iconBox, backgroundColor: "#fff7ed" }}>
+                <Shield style={{ height: 24, width: 24, color: styles.orangeColor.color }} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isLargeScreen ? "repeat(2, 1fr)" : "repeat(1, 1fr)",
+        gap: "24px",
+      }}>
+        {/* Farm Productivity Analysis */}
+        <Card>
+          <CardHeader>
+            <CardTitle style={{ display: "flex", alignItems: "center", fontSize: "1.25rem", fontWeight: "600", color: "#1f2937" }}>
+              <Calculator style={{ height: 20, width: 20, marginRight: 8, color: styles.blueColor.color }} />
+              {t("analytics.productivity") || "Productivity Analysis"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {productivityMetrics.length > 0 ? (
+                productivityMetrics
+                  .sort((a, b) => b.estimatedLoss - a.estimatedLoss)
+                  .slice(0, 5)
+                  .map((metric, index) => (
+                    <div
+                      key={metric.animalId}
+                      style={styles.listItem}
+                      data-testid={`productivity-${index}`}
+                    >
+                      <div style={styles.listItemHeader}>
+                        <h4 style={styles.listItemTitle}>
+                          {metric.animalName}
+                        </h4>
+                        <Badge
+                          variant="outline"
+                          style={{ textTransform: 'capitalize', color: '#4b5563', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
+                        >
+                          {metric.species}
+                        </Badge>
+                      </div>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "16px", fontSize: "0.875rem" }}>
+                        <div>
+                          <span style={styles.pSmall}>
+                            {language === "ur"
+                              ? "بنیادی پیداوار:"
+                              : "Baseline:"}
+                          </span>
+                          <p style={styles.listItemTitle}>
+                            {metric.baselineProductivity} L/day
+                          </p>
+                        </div>
+                        <div>
+                          <span style={styles.pSmall}>
+                            {language === "ur" ? "موجودہ پیداوار:" : "Current:"}
+                          </span>
+                          <p style={styles.listItemTitle}>
+                            {metric.currentProductivity.toFixed(1)} L/day
+                          </p>
+                        </div>
+                        <div>
+                          <span style={styles.pSmall}>
+                            {language === "ur" ? "نقصان:" : "Loss:"}
+                          </span>
+                          <p style={{ ...styles.listItemTitle, ...styles.redColor }}>
+                            {metric.lossPercentage.toFixed(1)}%
+                          </p>
+                        </div>
+                        <div>
+                          <span style={styles.pSmall}>
+                            {language === "ur"
+                              ? "مالی نقصان:"
+                              : "Financial Loss:"}
+                          </span>
+                          <p style={{ ...styles.listItemTitle, ...styles.redColor }}>
+                            PKR {metric.estimatedLoss.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {metric.illnessDays > 0 && (
+                        <p style={{ fontSize: "0.75rem", color: "#4b5563", marginTop: "8px" }}>
+                          {language === "ur"
+                            ? `بیماری کے دن: ${metric.illnessDays}`
+                            : `Illness days: ${metric.illnessDays}`}
+                        </p>
+                      )}
+                    </div>
+                  ))
+              ) : (
+                <p style={styles.centerText}>
+                  {language === "ur"
+                    ? "کوئی دودھ دینے والے جانور کا ڈیٹا دستیاب نہیں"
+                    : "No dairy animal data available"}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pet Welfare Scores */}
+        <Card>
+          <CardHeader>
+            <CardTitle style={{ display: "flex", alignItems: "center", fontSize: "1.25rem", fontWeight: "600", color: "#1f2937" }}>
+              <Heart style={{ height: 20, width: 20, marginRight: 8, color: styles.blueColor.color }} />
+              {t("analytics.welfare") || "Welfare Scores"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {welfareScores.length > 0 ? (
+                welfareScores
+                  .sort((a, b) => a.score - b.score)
+                  .slice(0, 8)
+                  .map((welfare, index) => (
+                    <div
+                      key={welfare.animalId}
+                      style={styles.listItem}
+                      data-testid={`welfare-${index}`}
+                    >
+                      <div style={styles.listItemHeader}>
+                        <h4 style={styles.listItemTitle}>
+                          {welfare.animalName}
+                        </h4>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <Badge style={getWelfareColorStyle(welfare.score)}>
+                            {welfare.score.toFixed(0)}/100
+                          </Badge>
+                          <Badge
+                            variant="outline"
+                            style={{ textTransform: 'capitalize', color: '#4b5563', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
+                          >
+                            {welfare.species}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "0.875rem" }}>
+                        <div style={styles.flexSpaceBetween}>
+                          <span style={styles.pSmall}>
+                            {language === "ur" ? "آخری ملاقات:" : "Last Visit:"}
+                          </span>
+                          <span>
+                            {welfare.lastVisit
+                              ? welfare.lastVisit.toLocaleDateString()
+                              : language === "ur"
+                                ? "کوئی ریکارڈ نہیں"
+                                : "No record"}
+                          </span>
+                        </div>
+                        <div style={styles.flexSpaceBetween}>
+                          <span style={styles.pSmall}>
+                            {language === "ur" ? "ویکسینیشن:" : "Vaccination:"}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            style={{
+                                color: welfare.vaccinationStatus === "up-to-date" ? styles.greenColor.color :
+                                       welfare.vaccinationStatus === "overdue" ? styles.orangeColor.color :
+                                       styles.redColor.color,
+                                backgroundColor: '#fff',
+                                border: '1px solid #e5e7eb',
+                            }}
+                          >
+                            {welfare.vaccinationStatus === "up-to-date" &&
+                              (language === "ur" ? "اپ ٹو ڈیٹ" : "Up to date")}
+                            {welfare.vaccinationStatus === "overdue" &&
+                              (language === "ur" ? "تاخیر" : "Overdue")}
+                            {welfare.vaccinationStatus === "none" &&
+                              (language === "ur" ? "کوئی نہیں" : "None")}
+                          </Badge>
+                        </div>
+                        <div style={styles.flexSpaceBetween}>
+                          <span style={styles.pSmall}>
+                            {language === "ur"
+                              ? "صحت کا رجحان:"
+                              : "Health Trend:"}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.875rem",
+                              fontWeight: "500",
+                              color: welfare.healthTrend === "improving" ? styles.greenColor.color :
+                                    welfare.healthTrend === "stable" ? styles.blueColor.color :
+                                    styles.redColor.color,
+                            }}
+                          >
+                            {welfare.healthTrend === "improving" &&
+                              (language === "ur" ? "بہتری" : "Improving")}
+                            {welfare.healthTrend === "stable" &&
+                              (language === "ur" ? "مستحکم" : "Stable")}
+                            {welfare.healthTrend === "declining" &&
+                              (language === "ur" ? "خراب" : "Declining")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <p style={styles.centerText}>
+                  {language === "ur"
+                    ? "کوئی پالتو جانور کا ڈیٹا دستیاب نہیں"
+                    : "No pet data available"}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* AMR Risk Assessment */}
+        <Card style={{ gridColumn: isLargeScreen ? "span 2 / span 2" : "auto" }}>
+          <CardHeader>
+            <CardTitle style={{ display: "flex", alignItems: "center", fontSize: "1.25rem", fontWeight: "600", color: "#1f2937" }}>
+              <Shield style={{ height: 20, width: 20, marginRight: 8, color: styles.blueColor.color }} />
+              {t("analytics.amr") || "AMR Risk Assessment"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div style={{ display: "grid", gridTemplateColumns: isMediumScreen ? "repeat(2, 1fr)" : "repeat(1, 1fr)", gap: "16px" }}>
+              {amrRisks.length > 0 ? (
+                amrRisks
+                  .filter((risk) => risk.riskLevel !== "low")
+                  .sort((a, b) => {
+                    const riskOrder = {
+                      critical: 4,
+                      high: 3,
+                      medium: 2,
+                      low: 1,
+                    };
+                    return riskOrder[b.riskLevel] - riskOrder[a.riskLevel];
+                  })
+                  .slice(0, 6)
+                  .map((risk, index) => (
+                    <div
+                      key={risk.animalId}
+                      style={styles.listItem}
+                      data-testid={`amr-risk-${index}`}
+                    >
+                      <div style={styles.listItemHeader}>
+                        <h4 style={styles.listItemTitle}>
+                          {risk.animalName}
+                        </h4>
+                        <Badge style={getRiskColorStyle(risk.riskLevel)}>
+                          {risk.riskLevel.toUpperCase()}
+                        </Badge>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.875rem" }}>
+                        <div style={styles.flexSpaceBetween}>
+                          <span style={styles.pSmall}>
+                            {language === "ur"
+                              ? "اینٹی بائیوٹک کا استعمال:"
+                              : "Antibiotic Treatments:"}
+                          </span>
+                          <span style={styles.listItemTitle}>
+                            {risk.antibioticTreatments}
+                          </span>
+                        </div>
+                        <div style={styles.flexSpaceBetween}>
+                          <span style={styles.pSmall}>
+                            {language === "ur"
+                              ? "دوبارہ علاج:"
+                              : "Repeated Treatments:"}
+                          </span>
+                          <span style={styles.listItemTitle}>
+                            {risk.repeatedTreatments}
+                          </span>
+                        </div>
+                        {risk.lastTreatmentDate && (
+                          <div style={styles.flexSpaceBetween}>
+                            <span style={styles.pSmall}>
+                              {language === "ur"
+                                ? "آخری علاج:"
+                                : "Last Treatment:"}
+                            </span>
+                            <span>
+                              {risk.lastTreatmentDate.toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {risk.riskFactors.length > 0 && (
+                          <div style={{ marginTop: "8px" }}>
+                            <p style={{ fontSize: "0.75rem", color: "#4b5563", marginBottom: "4px" }}>
+                              {language === "ur"
+                                ? "خطرے کے عوامل:"
+                                : "Risk Factors:"}
+                            </p>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                              {risk.riskFactors.map((factor, factorIndex) => (
+                                <Badge
+                                  key={factorIndex}
+                                  variant="outline"
+                                  style={{ fontSize: "0.75rem", color: "#4b5563", backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
+                                >
+                                  {factor}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div style={{ gridColumn: "span 2 / span 2" }}>
+                  <p style={styles.centerText}>
+                    {language === "ur"
+                      ? "کوئی AMR خطرے کا ڈیٹا دستیاب نہیں"
+                      : "No AMR risk data available"}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {amrRisks.filter((risk) => risk.riskLevel !== "low").length > 6 && (
+              <div style={{ marginTop: "16px", textAlign: "center" as "center" }}>
+                <Button variant="outline" size="sm" data-testid="view-more-amr">
+                  {language === "ur" ? "مزید دیکھیں" : "View More"}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recommendations */}
+      <Card style={{ marginTop: "24px" }}>
+        <CardHeader>
+          <CardTitle style={{ display: "flex", alignItems: "center", fontSize: "1.25rem", fontWeight: "600", color: "#1f2937" }}>
+            <TrendingUp style={{ height: 20, width: 20, marginRight: 8, color: styles.blueColor.color }} />
+            {language === "ur" ? "سفارشات" : "Recommendations"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div style={{ display: "grid", gridTemplateColumns: isMediumScreen ? "repeat(3, 1fr)" : "repeat(1, 1fr)", gap: "16px" }}>
+            {totalProductivityLoss > 10000 && (
+              <div style={styles.recRed}>
+                <h4 style={styles.recTitleRed}>
+                  {language === "ur"
+                    ? "پیداوار میں بہتری"
+                    : "Productivity Improvement"}
+                </h4>
+                <p style={styles.recTextRed}>
+                  {language === "ur"
+                    ? "ماسٹائٹس کی روک تھام پر توجہ دیں اور حفظان صحت بہتر بنائیں"
+                    : "Focus on mastitis prevention and improve hygiene protocols"}
+                </p>
+              </div>
+            )}
+
+            {averageWelfareScore < 70 && (
+              <div style={styles.recOrange}>
+                <h4 style={{...styles.recTitleRed, color: "#9a3412"}}>
+                  {language === "ur"
+                    ? "فلاح و بہبود کی جانچ"
+                    : "Welfare Check"}
+                </h4>
+                <p style={{...styles.recTextRed, color: "#c2410c"}}>
+                  {language === "ur"
+                    ? "غیر حاضر یا زائد المیعاد ویکسینیشن والے جانوروں کے لیے ملاقاتیں بک کروائیں"
+                    : "Schedule visits for animals with no or overdue vaccinations"}
+                </p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
