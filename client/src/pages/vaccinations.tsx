@@ -1,5 +1,4 @@
 import { useState, useEffect, FormEvent } from "react";
-import { format } from "date-fns";
 
 interface Vaccination {
   id?: number;
@@ -9,7 +8,8 @@ interface Vaccination {
   status?: string;
 }
 
-const Vaccinations = () => {
+const Vaccinations = ({ language }: { language: string }) => {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [vaccinations, setVaccinations] = useState<Vaccination[]>([]);
   const [form, setForm] = useState({
     animalId: 0,
@@ -17,7 +17,6 @@ const Vaccinations = () => {
     dueDate: "",
     status: "",
   });
-  const [lang, setLang] = useState<"en" | "ur">("en");
 
   useEffect(() => {
     fetch("/api/vaccinations")
@@ -42,107 +41,39 @@ const Vaccinations = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <button
-        onClick={() => setLang(lang === "en" ? "ur" : "en")}
-        className="mb-4 p-2 bg-secondary text-secondary-foreground rounded"
-      >
-        Switch Language (تبدیل زبان)
-      </button>
-      <h1 className="text-3xl font-bold text-foreground mb-6 urdu-text">
-        {lang === "en" ? "Vaccination Scheduler" : "ویکسینیشن شیڈولر"}
+    <div style={{ padding: "32px 16px", maxWidth: "1280px", margin: "0 auto" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: "bold", marginBottom: "8px", color: "#111" }}>
+        {t("Vaccination Management", "ویکسین کی تدابیر")}
       </h1>
+      <p style={{ color: "#666", marginBottom: "32px" }}>
+        {t("Track animal vaccinations and PVMC compliance", "جانوروں کی ویکسین اور PVMC کی تعریف کو ٹریک کریں")}
+      </p>
       <form
         onSubmit={handleSubmit}
-        className="glass-card p-6 rounded-lg shadow-md max-w-md"
+        style={{ padding: "24px", backgroundColor: "#fff", borderRadius: "8px", maxWidth: "500px", marginBottom: "32px" }}
       >
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
-            {lang === "en" ? "Animal ID:" : "جانور کا ID:"}
-          </label>
-          <input
-            type="number"
-            value={form.animalId}
-            onChange={(e) =>
-              setForm({ ...form, animalId: parseInt(e.target.value) || 0 })
-            }
-            required
-            className="mt-1 p-2 w-full border border-border rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
-            {lang === "en" ? "Vaccine Type:" : "ویکسین کی قسم:"}
-          </label>
-          <input
-            type="text"
-            value={form.vaccineType}
-            onChange={(e) => setForm({ ...form, vaccineType: e.target.value })}
-            required
-            className="mt-1 p-2 w-full border border-border rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
-            {lang === "en" ? "Due Date:" : "موعد کی تاریخ:"}
-          </label>
-          <input
-            type="date"
-            value={form.dueDate}
-            onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-            required
-            className="mt-1 p-2 w-full border border-border rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
-            {lang === "en" ? "Status:" : "حالت:"}
-          </label>
-          <input
-            type="text"
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value })}
-            className="mt-1 p-2 w-full border border-border rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-        >
-          {lang === "en" ? "Add Vaccination" : "ویکسینیشن شامل کریں"}
+        <input type="number" value={form.animalId} onChange={(e) => setForm({ ...form, animalId: parseInt(e.target.value) || 0 })} placeholder={t("Animal ID", "جانور کا ID")} required style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #e5e7eb", borderRadius: "6px" }} />
+        <input type="text" value={form.vaccineType} onChange={(e) => setForm({ ...form, vaccineType: e.target.value })} placeholder={t("Vaccine Type", "ویکسین کی قسم")} required style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #e5e7eb", borderRadius: "6px" }} />
+        <input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} required style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #e5e7eb", borderRadius: "6px" }} />
+        <input type="text" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} placeholder={t("Status", "حالت")} style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #e5e7eb", borderRadius: "6px" }} />
+        <button type="submit" style={{ width: "100%", padding: "10px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: "600", cursor: "pointer" }}>
+          {t("Add Vaccination", "ویکسینیشن شامل کریں")}
         </button>
       </form>
-      <ul className="mt-6 space-y-4">
+      <div style={{ marginTop: "16px" }}>
         {vaccinations.length === 0 ? (
-          <li className="text-muted-foreground">
-            {lang === "en"
-              ? "No vaccinations found."
-              : "کوئی ویکسینیشن نہیں ملی."}
-          </li>
+          <p style={{ color: "#666" }}>{t("No vaccinations found", "کوئی ویکسینیشن نہیں ملی")}</p>
         ) : (
           vaccinations.map((vax) => (
-            <li key={vax.id} className="glass-card p-4 rounded-lg shadow-md">
-              <span className="text-foreground">
-                Animal ID: {vax.animalId} -{" "}
-                {vax.vaccineType || (lang === "en" ? "Unknown" : "نامعلوم")} -
-                Due:{" "}
-                {vax.dueDate ? format(new Date(vax.dueDate), "PPP") : "No Date"}{" "}
-                - Status:{" "}
-                {vax.status || (lang === "en" ? "Unknown" : "نامعلوم")}
-              </span>
-              {vax.dueDate && new Date(vax.dueDate) < new Date() && (
-                <span className="text-destructive ml-2">
-                  {lang === "en" ? "(Overdue)" : "(اوورڈیو)"}
-                </span>
-              )}
-            </li>
+            <div key={vax.id} style={{ padding: "16px", border: "1px solid #e5e7eb", borderRadius: "8px", marginBottom: "12px" }}>
+              <p style={{ margin: 0, color: "#111", fontWeight: "600" }}>Animal {vax.animalId} - {vax.vaccineType}</p>
+              <p style={{ margin: "4px 0 0 0", color: "#666", fontSize: "14px" }}>{t("Due:", "موعد :")} {vax.dueDate || "N/A"}</p>
+            </div>
           ))
         )}
-      </ul>
-      <p className="mt-4 text-sm text-muted-foreground">
-        {lang === "en"
-          ? "PVMC Compliant Schedules: HS vaccine every 6 months, Rabies annually."
-          : "PVMC مطابق شیڈول: HS ویکسین ہر 6 مہینے, ریبیز سالانہ."}
+      </div>
+      <p style={{ marginTop: "16px", fontSize: "14px", color: "#999" }}>
+        {t("PVMC Compliant: HS vaccine every 6 months, Rabies annually", "PVMC مطابق: HS ہر 6 مہینے، ریبیز سالانہ")}
       </p>
     </div>
   );

@@ -8,7 +8,8 @@ interface Outbreak {
   advisory?: string;
 }
 
-const Outbreaks = () => {
+const Outbreaks = ({ language }: { language: string }) => {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [outbreaks, setOutbreaks] = useState<Outbreak[]>([]);
   const [form, setForm] = useState({
     disease: "",
@@ -16,7 +17,6 @@ const Outbreaks = () => {
     province: "",
     advisory: "",
   });
-  const [lang, setLang] = useState<"en" | "ur">("en");
 
   useEffect(() => {
     fetch("/api/outbreaks")

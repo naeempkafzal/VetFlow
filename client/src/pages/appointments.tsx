@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
-const Appointments = () => {
+const Appointments = ({ language }: { language: string }) => {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [appointments, setAppointments] = useState<any[]>([]);
   const [newAppointment, setNewAppointment] = useState({
     date: "",

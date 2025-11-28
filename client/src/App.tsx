@@ -1,20 +1,78 @@
 import { useState } from "react";
+import Dashboard from "./pages/dashboard";
+import Vaccinations from "./pages/vaccinations";
+import Inventory from "./pages/inventory";
+import Appointments from "./pages/appointments";
+import Outbreaks from "./pages/outbreaks";
+import Analytics from "./pages/analytics";
+import NotFound from "./pages/not-found";
+
+const pages = [
+  { name: "Dashboard", path: "/", nameUr: "ڈیش بورڈ" },
+  { name: "Records", path: "/records", nameUr: "ریکارڈز" },
+  { name: "Vaccinations", path: "/vaccinations", nameUr: "ویکسین" },
+  { name: "Inventory", path: "/inventory", nameUr: "اسٹاک" },
+  { name: "Appointments", path: "/appointments", nameUr: "اپائنٹمنٹس" },
+  { name: "Outbreaks", path: "/outbreaks", nameUr: "پھیلاؤ" },
+  { name: "Analytics", path: "/analytics", nameUr: "تجزیہ" },
+];
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState("/");
+  const [language, setLanguage] = useState<"en" | "ur">("en");
+
+  const isRTL = language === "ur";
+  const navItems = pages.map(p => ({ name: language === "en" ? p.name : p.nameUr, path: p.path }));
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "#f9fafb" }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "#f9fafb", direction: isRTL ? "rtl" : "ltr" }}>
       <nav style={{ backgroundColor: "#fff", borderBottom: "1px solid #e5e7eb", boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center", height: "64px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => setCurrentPage("/")}>
             <div style={{ backgroundColor: "#2563eb", padding: "8px", borderRadius: "8px", fontSize: "20px" }}>🏥</div>
             <div>
               <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#111", margin: 0 }}>VetFlow</h1>
-              <p style={{ fontSize: "12px", color: "#999", margin: 0 }}>Veterinary Automation</p>
+              <p style={{ fontSize: "12px", color: "#999", margin: 0 }}>{language === "en" ? "Veterinary Automation" : "ویٹرنری خودکاری"}</p>
             </div>
           </div>
+          
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+            {navItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => setCurrentPage(item.path)}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: currentPage === item.path ? "#2563eb" : "transparent",
+                  color: currentPage === item.path ? "#fff" : "#374151",
+                }}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <button
+              onClick={() => setLanguage(language === "en" ? "ur" : "en")}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: "600",
+                border: "1px solid #e5e7eb",
+                backgroundColor: "#f3f4f6",
+                cursor: "pointer",
+                color: "#374151",
+              }}
+            >
+              {language === "en" ? "اردو" : "EN"}
+            </button>
             <div style={{ width: "32px", height: "32px", backgroundColor: "#2563eb", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#fff", fontSize: "12px", fontWeight: "bold" }}>Dr</span>
             </div>
@@ -22,69 +80,14 @@ const App = () => {
         </div>
       </nav>
 
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px 16px" }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
-          <h1 style={{ fontSize: "30px", fontWeight: "bold", marginBottom: "8px", color: "#111" }}>Veterinary Dashboard</h1>
-          <p style={{ color: "#666", marginBottom: "32px" }}>Welcome to VetFlow - Comprehensive veterinary workflow automation</p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px", marginBottom: "32px" }}>
-            <div style={{ padding: "16px", backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-              <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Total Animals</p>
-              <p style={{ fontSize: "24px", fontWeight: "bold", color: "#111", margin: 0 }}>12</p>
-            </div>
-            <div style={{ padding: "16px", backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-              <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Appointments Today</p>
-              <p style={{ fontSize: "24px", fontWeight: "bold", color: "#111", margin: 0 }}>3</p>
-            </div>
-            <div style={{ padding: "16px", backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-              <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Overdue Vaccinations</p>
-              <p style={{ fontSize: "24px", fontWeight: "bold", color: "#111", margin: 0 }}>2</p>
-            </div>
-            <div style={{ padding: "16px", backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-              <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Low Stock Items</p>
-              <p style={{ fontSize: "24px", fontWeight: "bold", color: "#111", margin: 0 }}>1</p>
-            </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
-            <div style={{ gridColumn: "span 2", backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "24px" }}>
-              <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Recent Activities</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div style={{ padding: "12px", borderLeft: "4px solid #2563eb", backgroundColor: "#eff6ff" }}>
-                  <p style={{ fontWeight: "500", color: "#111", margin: 0 }}>Animal Record Created</p>
-                  <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Cow registered - Sahiwal breed</p>
-                </div>
-                <div style={{ padding: "12px", borderLeft: "4px solid #16a34a", backgroundColor: "#f0fdf4" }}>
-                  <p style={{ fontWeight: "500", color: "#111", margin: 0 }}>Vaccination Completed</p>
-                  <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>FMD vaccine administered</p>
-                </div>
-                <div style={{ padding: "12px", borderLeft: "4px solid #ea580c", backgroundColor: "#fff7ed" }}>
-                  <p style={{ fontWeight: "500", color: "#111", margin: 0 }}>Inventory Updated</p>
-                  <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Stock levels adjusted</p>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "24px" }}>
-              <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>System Status</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "14px", color: "#666" }}>Backend API</span>
-                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#186a3b", backgroundColor: "#c6f6d5", padding: "4px 8px", borderRadius: "4px" }}>✓ Online</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "14px", color: "#666" }}>Database</span>
-                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#186a3b", backgroundColor: "#c6f6d5", padding: "4px 8px", borderRadius: "4px" }}>✓ Connected</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "14px", color: "#666" }}>PVMC Compliance</span>
-                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#1e40af", backgroundColor: "#dbeafe", padding: "4px 8px", borderRadius: "4px" }}>✓ Ready</span>
-                </div>
-              </div>
-              <p style={{ fontSize: "12px", color: "#999", marginTop: "16px" }}>Last sync: 5 mins ago</p>
-            </div>
-          </div>
-        </div>
+      <main style={{ flex: 1, overflowY: "auto" }}>
+        {currentPage === "/" && <Dashboard language={language} />}
+        {currentPage === "/vaccinations" && <Vaccinations language={language} />}
+        {currentPage === "/inventory" && <Inventory language={language} />}
+        {currentPage === "/appointments" && <Appointments language={language} />}
+        {currentPage === "/outbreaks" && <Outbreaks language={language} />}
+        {currentPage === "/analytics" && <Analytics language={language} />}
+        {currentPage !== "/" && currentPage !== "/vaccinations" && currentPage !== "/inventory" && currentPage !== "/appointments" && currentPage !== "/outbreaks" && currentPage !== "/analytics" && <NotFound language={language} />}
       </main>
     </div>
   );

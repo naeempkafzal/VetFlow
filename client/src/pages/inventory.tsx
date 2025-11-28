@@ -8,7 +8,8 @@ interface InventoryItem {
   lowStockThreshold?: number;
 }
 
-const Inventory = () => {
+const Inventory = ({ language }: { language: string }) => {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [form, setForm] = useState({
     itemName: "",
@@ -16,7 +17,6 @@ const Inventory = () => {
     cost: 0,
     lowStockThreshold: 10,
   });
-  const [lang, setLang] = useState<"en" | "ur">("en");
 
   useEffect(() => {
     fetch("http://localhost:5001/api/inventory")

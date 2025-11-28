@@ -1,4 +1,6 @@
-export default function Dashboard() {
+export default function Dashboard({ language }: { language: string }) {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
+
   return (
     <div style={{ padding: "32px", maxWidth: "1280px", margin: "0 auto" }}>
       <h1 style={{ fontSize: "30px", fontWeight: "bold", marginBottom: "8px", color: "#111" }}>
