@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function App() {
+const App = () => {
   const [currentPage, setCurrentPage] = useState("/");
 
   return (
@@ -46,26 +46,48 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "24px" }}>
-            <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>System Status</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "14px", color: "#666" }}>Backend API</span>
-                <span style={{ fontSize: "12px", fontWeight: "600", color: "#186a3b", backgroundColor: "#c6f6d5", padding: "4px 8px", borderRadius: "4px" }}>✓ Online</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "14px", color: "#666" }}>Database</span>
-                <span style={{ fontSize: "12px", fontWeight: "600", color: "#186a3b", backgroundColor: "#c6f6d5", padding: "4px 8px", borderRadius: "4px" }}>✓ Connected</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "14px", color: "#666" }}>PVMC Compliance</span>
-                <span style={{ fontSize: "12px", fontWeight: "600", color: "#1e40af", backgroundColor: "#dbeafe", padding: "4px 8px", borderRadius: "4px" }}>✓ Ready</span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
+            <div style={{ gridColumn: "span 2", backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "24px" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Recent Activities</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ padding: "12px", borderLeft: "4px solid #2563eb", backgroundColor: "#eff6ff" }}>
+                  <p style={{ fontWeight: "500", color: "#111", margin: 0 }}>Animal Record Created</p>
+                  <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Cow registered - Sahiwal breed</p>
+                </div>
+                <div style={{ padding: "12px", borderLeft: "4px solid #16a34a", backgroundColor: "#f0fdf4" }}>
+                  <p style={{ fontWeight: "500", color: "#111", margin: 0 }}>Vaccination Completed</p>
+                  <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>FMD vaccine administered</p>
+                </div>
+                <div style={{ padding: "12px", borderLeft: "4px solid #ea580c", backgroundColor: "#fff7ed" }}>
+                  <p style={{ fontWeight: "500", color: "#111", margin: 0 }}>Inventory Updated</p>
+                  <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>Stock levels adjusted</p>
+                </div>
               </div>
             </div>
-            <p style={{ fontSize: "12px", color: "#999", marginTop: "16px" }}>Last sync: 5 mins ago</p>
+
+            <div style={{ backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "24px" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>System Status</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "14px", color: "#666" }}>Backend API</span>
+                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#186a3b", backgroundColor: "#c6f6d5", padding: "4px 8px", borderRadius: "4px" }}>✓ Online</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "14px", color: "#666" }}>Database</span>
+                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#186a3b", backgroundColor: "#c6f6d5", padding: "4px 8px", borderRadius: "4px" }}>✓ Connected</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "14px", color: "#666" }}>PVMC Compliance</span>
+                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#1e40af", backgroundColor: "#dbeafe", padding: "4px 8px", borderRadius: "4px" }}>✓ Ready</span>
+                </div>
+              </div>
+              <p style={{ fontSize: "12px", color: "#999", marginTop: "16px" }}>Last sync: 5 mins ago</p>
+            </div>
           </div>
         </div>
       </main>
     </div>
   );
-}
+};
+
+export default App;
