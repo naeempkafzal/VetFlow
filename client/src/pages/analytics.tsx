@@ -59,8 +59,8 @@ interface AMRRisk {
   riskFactors: string[];
 }
 
-export default function Analytics() {
-  const { t, language } = useTranslation();
+export default function Analytics({ language = "en" }: { language?: string }) {
+  const { t } = useTranslation();
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("3months");
   const [selectedSpecies, setSelectedSpecies] = useState<string>("all");
 
