@@ -18,7 +18,7 @@ import {
   Plus,
   ArrowRight,
 } from "lucide-react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 
 interface DashboardStats {
   totalAnimals: number;
@@ -29,7 +29,8 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const { t, language } = useTranslation(); // Added language for conditional rendering
+  const { t, language } = useTranslation();
+  const [, navigate] = useLocation();
 
   const {
     data: stats = {
@@ -41,22 +42,22 @@ export default function Dashboard() {
     },
     isLoading,
   } = useQuery<DashboardStats>({
-    queryKey: ["http://localhost:5001/api/analytics/dashboard"],
+    queryKey: ["/api/analytics/dashboard"],
     retry: false,
   });
 
   const { data: upcomingAppointments = [] } = useQuery<any[]>({
-    queryKey: ["http://localhost:5001/api/appointments/upcoming"],
+    queryKey: ["/api/appointments/upcoming"],
     retry: false,
   });
 
   const { data: lowStockItems = [] } = useQuery<any[]>({
-    queryKey: ["http://localhost:5001/api/inventory/low-stock"],
+    queryKey: ["/api/inventory/low-stock"],
     retry: false,
   });
 
   const { data: activeOutbreaks = [] } = useQuery<any[]>({
-    queryKey: ["http://localhost:5001/api/outbreaks/active"],
+    queryKey: ["/api/outbreaks/active"],
     retry: false,
   });
 
@@ -116,7 +117,6 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
@@ -129,25 +129,25 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="mt-4 md:mt-0 flex gap-2">
-            <Link to="/symptom-checker">
-              <Button
-                className="bg-blue-600 text-white hover:bg-blue-700"
-                data-testid="quick-symptom-check"
-              >
-                <Stethoscope className="h-4 w-4 mr-2" />
-                Quick Symptom Check
-              </Button>
-            </Link>
-            <Link to="/records">
-              <Button variant="outline" data-testid="add-animal">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Animal
-              </Button>
-            </Link>
+            <Button
+              className="bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => navigate("/symptom-checker")}
+              data-testid="quick-symptom-check"
+            >
+              <Stethoscope className="h-4 w-4 mr-2" />
+              Quick Symptom Check
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/records")}
+              data-testid="add-animal"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Animal
+            </Button>
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
@@ -176,9 +176,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Quick Actions */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -188,51 +186,46 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Link to="/symptom-checker">
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                    data-testid="action-symptom-checker"
-                  >
-                    <Stethoscope className="h-6 w-6 mb-2" />
-                    <span className="text-xs">Symptom Checker</span>
-                  </Button>
-                </Link>
-                <Link to="/appointments">
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                    data-testid="action-appointments"
-                  >
-                    <Calendar className="h-6 w-6 mb-2" />
-                    <span className="text-xs">Appointments</span>
-                  </Button>
-                </Link>
-                <Link to="/vaccinations">
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                    data-testid="action-vaccinations"
-                  >
-                    <Syringe className="h-6 w-6 mb-2" />
-                    <span className="text-xs">Vaccinations</span>
-                  </Button>
-                </Link>
-                <Link to="/inventory">
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                    data-testid="action-inventory"
-                  >
-                    <Package className="h-6 w-6 mb-2" />
-                    <span className="text-xs">Inventory</span>
-                  </Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  className="h-20 flex flex-col items-center justify-center"
+                  onClick={() => navigate("/symptom-checker")}
+                  data-testid="action-symptom-checker"
+                >
+                  <Stethoscope className="h-6 w-6 mb-2" />
+                  <span className="text-xs">Symptom Checker</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-20 flex flex-col items-center justify-center"
+                  onClick={() => navigate("/appointments")}
+                  data-testid="action-appointments"
+                >
+                  <Calendar className="h-6 w-6 mb-2" />
+                  <span className="text-xs">Appointments</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-20 flex flex-col items-center justify-center"
+                  onClick={() => navigate("/vaccinations")}
+                  data-testid="action-vaccinations"
+                >
+                  <Syringe className="h-6 w-6 mb-2" />
+                  <span className="text-xs">Vaccinations</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-20 flex flex-col items-center justify-center"
+                  onClick={() => navigate("/inventory")}
+                  data-testid="action-inventory"
+                >
+                  <Package className="h-6 w-6 mb-2" />
+                  <span className="text-xs">Inventory</span>
+                </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Today's Appointments */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -240,15 +233,14 @@ export default function Dashboard() {
                   <Calendar className="h-5 w-5 mr-2 text-blue-600" />
                   Today's Appointments
                 </span>
-                <Link to="/appointments">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    data-testid="view-all-appointments"
-                  >
-                    View All <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/appointments")}
+                  data-testid="view-all-appointments"
+                >
+                  View All <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -296,9 +288,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Alerts */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -322,15 +312,14 @@ export default function Dashboard() {
                           {stats.lowStockItems} items need restocking
                         </p>
                       </div>
-                      <Link to="/inventory">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-orange-600 border-orange-300"
-                        >
-                          View
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-orange-600 border-orange-300"
+                        onClick={() => navigate("/inventory")}
+                      >
+                        View
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -349,15 +338,14 @@ export default function Dashboard() {
                           {stats.overdueVaccinations} animals need vaccination
                         </p>
                       </div>
-                      <Link to="/vaccinations">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-300"
-                        >
-                          View
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-300"
+                        onClick={() => navigate("/vaccinations")}
+                      >
+                        View
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -376,15 +364,14 @@ export default function Dashboard() {
                           {stats.activeOutbreaks} disease outbreaks reported
                         </p>
                       </div>
-                      <Link to="/outbreaks">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-300"
-                        >
-                          View
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-300"
+                        onClick={() => navigate("/outbreaks")}
+                      >
+                        View
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -400,7 +387,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* PVMC Compliance */}
           <Card>
             <CardHeader>
               <CardTitle className="text-sm text-gray-800">

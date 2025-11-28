@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -28,7 +28,7 @@ const navigation = [
 ];
 
 export default function Navigation() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -53,22 +53,22 @@ export default function Navigation() {
               const isActive = location === item.href;
               
               return (
-                <Link key={item.name} href={item.href}>
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    size="sm"
-                    className={cn(
-                      "text-sm font-medium transition-colors",
-                      isActive 
-                        ? "bg-primary text-primary-foreground" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                    data-testid={`nav-${item.name.toLowerCase().replace(' ', '-')}`}
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {item.name}
-                  </Button>
-                </Link>
+                <Button
+                  key={item.name}
+                  variant={isActive ? "default" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "text-sm font-medium transition-colors",
+                    isActive 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )}
+                  onClick={() => navigate(item.href)}
+                  data-testid={`nav-${item.name.toLowerCase().replace(' ', '-')}`}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {item.name}
+                </Button>
               );
             })}
           </div>
@@ -104,23 +104,25 @@ export default function Navigation() {
                 const isActive = location === item.href;
                 
                 return (
-                  <Link key={item.name} href={item.href}>
-                    <Button
-                      variant={isActive ? "default" : "ghost"}
-                      size="sm"
-                      className={cn(
-                        "w-full justify-start text-sm font-medium",
-                        isActive 
-                          ? "bg-primary text-primary-foreground" 
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      data-testid={`mobile-nav-${item.name.toLowerCase().replace(' ', '-')}`}
-                    >
-                      <Icon className="h-4 w-4 mr-2" />
-                      <span className="truncate">{item.name}</span>
-                    </Button>
-                  </Link>
+                  <Button
+                    key={item.name}
+                    variant={isActive ? "default" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "w-full justify-start text-sm font-medium",
+                      isActive 
+                        ? "bg-primary text-primary-foreground" 
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => {
+                      navigate(item.href);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    data-testid={`mobile-nav-${item.name.toLowerCase().replace(' ', '-')}`}
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    <span className="truncate">{item.name}</span>
+                  </Button>
                 );
               })}
             </div>

@@ -1,5 +1,4 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { Link } from "wouter";
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -16,7 +15,7 @@ const Appointments = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/appointments");
+      const response = await fetch("/api/appointments");
       const data = await response.json();
       setAppointments(data);
     } catch (error) {
@@ -32,7 +31,7 @@ const Appointments = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5001/api/appointments", {
+      const response = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAppointment),
@@ -82,20 +81,34 @@ const Appointments = () => {
           placeholder="Notes"
           className="border p-2 mr-2"
         />
-        <button type="submit" className="bg-blue-500 text-white p-2">
+        <button
+          type="submit"
+          className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+        >
           Add Appointment
         </button>
       </form>
-      <ul>
-        {appointments.map((appt, index) => (
-          <li key={index} className="border p-2 mb-2">
-            {appt.date} {appt.time} - {appt.vet}: {appt.notes}
-          </li>
-        ))}
-      </ul>
-      <Link to="/" className="text-blue-500">
-        Back to Home
-      </Link>
+
+      <table className="w-full border-collapse border">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border p-2">Date</th>
+            <th className="border p-2">Time</th>
+            <th className="border p-2">Vet</th>
+            <th className="border p-2">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {appointments.map((apt, i) => (
+            <tr key={i}>
+              <td className="border p-2">{apt.date}</td>
+              <td className="border p-2">{apt.time}</td>
+              <td className="border p-2">{apt.vet}</td>
+              <td className="border p-2">{apt.notes}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
