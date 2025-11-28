@@ -47,7 +47,7 @@ const Inventory = ({ language }: { language: string }) => {
 
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px" }}>
-      <h1 style={{ fontSize: "30px", fontWeight: "bold", color: "#1f2937", marginBottom: "24px" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: "bold", color: "#f1f5f9", marginBottom: "24px" }}>
         {t("Inventory Management", "انوینٹری مینجمنٹ")}
       </h1>
       
@@ -55,14 +55,14 @@ const Inventory = ({ language }: { language: string }) => {
         style={{ 
           padding: "24px", 
           borderRadius: "8px", 
-          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", 
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)", 
           maxWidth: "448px", 
-          backgroundColor: "#fff",
+          backgroundColor: "#1e293b",
           marginBottom: "24px"
         }}
       >
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Item Name:", "اشیاء کا نام:")}
           </label>
           <input
@@ -73,15 +73,17 @@ const Inventory = ({ language }: { language: string }) => {
               marginTop: "4px", 
               padding: "8px", 
               width: "100%", 
-              border: "1px solid #d1d5db", 
+              border: "1px solid #334155", 
               borderRadius: "4px",
-              fontSize: "14px"
+              fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
         
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Quantity:", "مقدار:")}
           </label>
           <input
@@ -94,15 +96,17 @@ const Inventory = ({ language }: { language: string }) => {
               marginTop: "4px", 
               padding: "8px", 
               width: "100%", 
-              border: "1px solid #d1d5db", 
+              border: "1px solid #334155", 
               borderRadius: "4px",
-              fontSize: "14px"
+              fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
         
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Cost (PKR):", "قیمت (PKR):")}
           </label>
           <input
@@ -115,15 +119,17 @@ const Inventory = ({ language }: { language: string }) => {
               marginTop: "4px", 
               padding: "8px", 
               width: "100%", 
-              border: "1px solid #d1d5db", 
+              border: "1px solid #334155", 
               borderRadius: "4px",
-              fontSize: "14px"
+              fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
         
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Low Stock Threshold:", "کم اسٹاک کی حد:")}
           </label>
           <input
@@ -139,9 +145,11 @@ const Inventory = ({ language }: { language: string }) => {
               marginTop: "4px", 
               padding: "8px", 
               width: "100%", 
-              border: "1px solid #d1d5db", 
+              border: "1px solid #334155", 
               borderRadius: "4px",
-              fontSize: "14px"
+              fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
@@ -169,7 +177,7 @@ const Inventory = ({ language }: { language: string }) => {
       
       <ul style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px", listStyle: "none", padding: 0 }}>
         {inventory.length === 0 ? (
-          <li style={{ color: "#4b5563", padding: "16px", backgroundColor: "#fff", borderRadius: "8px" }}>
+          <li style={{ color: "#cbd5e1", padding: "16px", backgroundColor: "#1e293b", borderRadius: "8px" }}>
             {t("No inventory items found.", "کوئی انوینٹری آئٹم نہیں ملی.")}
           </li>
         ) : (
@@ -179,18 +187,18 @@ const Inventory = ({ language }: { language: string }) => {
               style={{ 
                 padding: "16px", 
                 borderRadius: "8px", 
-                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", 
-                backgroundColor: "#fff",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)", 
+                backgroundColor: "#1e293b",
                 border: item.quantity != null && item.lowStockThreshold != null && item.quantity < item.lowStockThreshold 
                   ? "2px solid #dc2626" 
-                  : "1px solid #e5e7eb"
+                  : "1px solid #334155"
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                <span style={{ color: "#1f2937", fontWeight: "600", fontSize: "16px" }}>
+                <span style={{ color: "#f1f5f9", fontWeight: "600", fontSize: "16px" }}>
                   {item.itemName || t("Unknown", "نامعلوم")}
                 </span>
-                <div style={{ display: "flex", gap: "16px", fontSize: "14px", color: "#4b5563" }}>
+                <div style={{ display: "flex", gap: "16px", fontSize: "14px", color: "#cbd5e1" }}>
                   <span>{t("Qty:", "مقدار:")} <strong>{item.quantity || 0}</strong></span>
                   <span>{t("Cost:", "قیمت:")} <strong>{item.cost || 0} PKR</strong></span>
                   <span>{t("Threshold:", "حد:")} <strong>{item.lowStockThreshold || 10}</strong></span>

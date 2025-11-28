@@ -496,7 +496,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                   .map((metric, index) => (
                     <div
                       key={metric.animalId}
-                      style={{ padding: "16px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#fff" }}
+                      style={{ padding: "16px", border: "1px solid #334155", borderRadius: "8px", backgroundColor: "#1e293b" }}
                       data-testid={`productivity-${index}`}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
@@ -515,7 +515,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                               ? "بنیادی پیداوار:"
                               : "Baseline:"}
                           </span>
-                          <p style={{ fontWeight: "500", color: "#1f2937" }}>
+                          <p style={{ fontWeight: "500", color: "#f1f5f9" }}>
                             {metric.baselineProductivity} L/day
                           </p>
                         </div>
@@ -523,7 +523,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                           <span style={{ color: "#4b5563" }}>
                             {language === "ur" ? "موجودہ پیداوار:" : "Current:"}
                           </span>
-                          <p style={{ fontWeight: "500", color: "#1f2937" }}>
+                          <p style={{ fontWeight: "500", color: "#f1f5f9" }}>
                             {metric.currentProductivity.toFixed(1)} L/day
                           </p>
                         </div>
@@ -583,7 +583,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                   .map((welfare, index) => (
                     <div
                       key={welfare.animalId}
-                      style={{ padding: "16px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#fff" }}
+                      style={{ padding: "16px", border: "1px solid #334155", borderRadius: "8px", backgroundColor: "#1e293b" }}
                       data-testid={`welfare-${index}`}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
@@ -688,7 +688,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                   .map((risk, index) => (
                     <div
                       key={risk.animalId}
-                      style={{ padding: "16px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#fff" }}
+                      style={{ padding: "16px", border: "1px solid #334155", borderRadius: "8px", backgroundColor: "#1e293b" }}
                       data-testid={`amr-risk-${index}`}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>

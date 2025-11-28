@@ -47,7 +47,7 @@ const Outbreaks = ({ language }: { language: string }) => {
 
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px" }}>
-      <h1 style={{ fontSize: "30px", fontWeight: "bold", color: "#1f2937", marginBottom: "24px" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: "bold", color: "#f1f5f9", marginBottom: "24px" }}>
         {t("Disease Outbreak Reporting", "بیماری کی وباء کی رپورٹنگ")}
       </h1>
 
@@ -55,18 +55,18 @@ const Outbreaks = ({ language }: { language: string }) => {
         style={{
           padding: "24px",
           borderRadius: "8px",
-          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)",
           maxWidth: "448px",
-          backgroundColor: "#fff",
+          backgroundColor: "#1e293b",
           marginBottom: "24px",
         }}
       >
-        <h2 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "16px", color: "#374151" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "16px", color: "#f1f5f9" }}>
           {t("Report New Outbreak", "نئی وباء کی رپورٹ کریں")}
         </h2>
 
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Disease:", "بیماری:")}
           </label>
           <input
@@ -78,15 +78,17 @@ const Outbreaks = ({ language }: { language: string }) => {
               marginTop: "4px",
               padding: "8px",
               width: "100%",
-              border: "1px solid #d1d5db",
+              border: "1px solid #334155",
               borderRadius: "4px",
               fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
 
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Geo Coordinates:", "جغرافیائی کوآرڈینیٹس:")}
           </label>
           <input
@@ -98,15 +100,17 @@ const Outbreaks = ({ language }: { language: string }) => {
               marginTop: "4px",
               padding: "8px",
               width: "100%",
-              border: "1px solid #d1d5db",
+              border: "1px solid #334155",
               borderRadius: "4px",
               fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
 
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Province:", "صوبہ:")}
           </label>
           <input
@@ -118,15 +122,17 @@ const Outbreaks = ({ language }: { language: string }) => {
               marginTop: "4px",
               padding: "8px",
               width: "100%",
-              border: "1px solid #d1d5db",
+              border: "1px solid #334155",
               borderRadius: "4px",
               fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
 
         <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
             {t("Advisory:", "مشورہ:")}
           </label>
           <input
@@ -138,9 +144,11 @@ const Outbreaks = ({ language }: { language: string }) => {
               marginTop: "4px",
               padding: "8px",
               width: "100%",
-              border: "1px solid #d1d5db",
+              border: "1px solid #334155",
               borderRadius: "4px",
               fontSize: "14px",
+              backgroundColor: "#0f172a",
+              color: "#f1f5f9"
             }}
           />
         </div>
@@ -166,14 +174,14 @@ const Outbreaks = ({ language }: { language: string }) => {
         </button>
       </div>
 
-      <div style={{ backgroundColor: "#fff", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", padding: "24px", marginBottom: "24px" }}>
-        <h2 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "16px", color: "#374151" }}>
+      <div style={{ backgroundColor: "#1e293b", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)", padding: "24px", marginBottom: "24px" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "16px", color: "#f1f5f9" }}>
           {t("Reported Outbreaks", "رپورٹ شدہ وباؤں")}
         </h2>
 
         <ul style={{ display: "flex", flexDirection: "column", gap: "16px", listStyle: "none", padding: 0, margin: 0 }}>
           {outbreaks.length === 0 ? (
-            <li style={{ color: "#6b7280", padding: "16px", backgroundColor: "#f9fafb", borderRadius: "8px", textAlign: "center" }}>
+            <li style={{ color: "#94a3b8", padding: "16px", backgroundColor: "#0f172a", borderRadius: "8px", textAlign: "center" }}>
               {t("No outbreaks reported.", "کوئی وباء رپورٹ نہیں ہوئی.")}
             </li>
           ) : (
@@ -183,39 +191,39 @@ const Outbreaks = ({ language }: { language: string }) => {
                 style={{
                   padding: "16px",
                   borderRadius: "8px",
-                  backgroundColor: "#fef2f2",
-                  border: "1px solid #fecaca",
+                  backgroundColor: "#7f1d1d",
+                  border: "1px solid #991b1b",
                 }}
               >
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "20px" }}>⚠️</span>
-                    <span style={{ fontSize: "16px", fontWeight: "600", color: "#991b1b" }}>
+                    <span style={{ fontSize: "16px", fontWeight: "600", color: "#fca5a5" }}>
                       {outbreak.disease || t("Unknown Disease", "نامعلوم بیماری")}
                     </span>
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "8px 16px", fontSize: "14px" }}>
-                    <span style={{ color: "#6b7280", fontWeight: "500" }}>
+                    <span style={{ color: "#f87171", fontWeight: "500" }}>
                       {t("Province:", "صوبہ:")}
                     </span>
-                    <span style={{ color: "#1f2937" }}>
+                    <span style={{ color: "#fca5a5" }}>
                       {outbreak.province || t("Unknown", "نامعلوم")}
                     </span>
 
-                    <span style={{ color: "#6b7280", fontWeight: "500" }}>
+                    <span style={{ color: "#f87171", fontWeight: "500" }}>
                       {t("Location:", "مقام:")}
                     </span>
-                    <span style={{ color: "#1f2937", fontFamily: "monospace", fontSize: "12px" }}>
+                    <span style={{ color: "#fca5a5", fontFamily: "monospace", fontSize: "12px" }}>
                       {outbreak.geoCoordinates || t("Not specified", "متعین نہیں")}
                     </span>
 
                     {outbreak.advisory && (
                       <>
-                        <span style={{ color: "#6b7280", fontWeight: "500" }}>
+                        <span style={{ color: "#f87171", fontWeight: "500" }}>
                           {t("Advisory:", "مشورہ:")}
                         </span>
-                        <span style={{ color: "#1f2937" }}>{outbreak.advisory}</span>
+                        <span style={{ color: "#fca5a5" }}>{outbreak.advisory}</span>
                       </>
                     )}
                   </div>
@@ -229,8 +237,8 @@ const Outbreaks = ({ language }: { language: string }) => {
       <div
         style={{
           padding: "16px",
-          backgroundColor: "#eff6ff",
-          border: "1px solid #bfdbfe",
+          backgroundColor: "#0c2540",
+          border: "1px solid #0c4a6e",
           borderRadius: "8px",
           borderLeft: "4px solid #2563eb",
         }}
@@ -238,10 +246,10 @@ const Outbreaks = ({ language }: { language: string }) => {
         <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
           <span style={{ fontSize: "20px" }}>ℹ️</span>
           <div>
-            <h3 style={{ fontSize: "14px", fontWeight: "600", color: "#1e40af", marginBottom: "4px" }}>
+            <h3 style={{ fontSize: "14px", fontWeight: "600", color: "#38bdf8", marginBottom: "4px" }}>
               {t("Biosafety Advisories", "بایو سیفٹی مشورے")}
             </h3>
-            <p style={{ fontSize: "14px", color: "#1e40af", margin: 0 }}>
+            <p style={{ fontSize: "14px", color: "#38bdf8", margin: 0 }}>
               {t(
                 "Punjab - Quarantine required for Hemorrhagic Septicemia (HS) cases. Contact local livestock department for guidance.",
                 "پنجاب - ہیمرجک سیپٹیسیمیا (HS) کیسز کے لیے قرنطینہ ضروری ہے۔ رہنمائی کے لیے مقامی لائیو سٹاک ڈیپارٹمنٹ سے رابطہ کریں۔"
