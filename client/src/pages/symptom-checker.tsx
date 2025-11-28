@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, FormEvent } from "react";
 
 const diseases = [
   {
@@ -21,13 +21,13 @@ const diseases = [
   },
 ];
 
-const SymptomChecker: React.FC = () => {
+const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState("");
   const [species, setSpecies] = useState("");
   const [results, setResults] = useState<any[]>([]); // Fixed syntax
   const [lang, setLang] = useState<"en" | "ur">("en"); // Fixed syntax
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const filtered = diseases.filter(
       (d) =>

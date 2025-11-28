@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 
 interface Animal {
   id?: number;
@@ -20,7 +20,7 @@ interface Visit {
   veterinarianName?: string;
 }
 
-const Records: React.FC = () => {
+const Records = () => {
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [visits, setVisits] = useState<Visit[]>([]);
   const [form, setForm] = useState({
@@ -48,7 +48,7 @@ const Records: React.FC = () => {
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  const handleAnimalSubmit = (e: React.FormEvent) => {
+  const handleAnimalSubmit = (e: FormEvent) => {
     e.preventDefault();
     fetch("http://localhost:5001/api/records", {
       method: "POST",
@@ -63,7 +63,7 @@ const Records: React.FC = () => {
       .catch((err) => console.error("Error adding animal:", err));
   };
 
-  const handleVisitSubmit = (e: React.FormEvent) => {
+  const handleVisitSubmit = (e: FormEvent) => {
     e.preventDefault();
     fetch("http://localhost:5001/api/records/visits", {
       method: "POST",

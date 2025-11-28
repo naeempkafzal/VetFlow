@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import { useState, FormEvent } from "react";
 
-const AMRAssessment: React.FC = () => {
+const AMRAssessment = () => {
   const [healthData, setHealthData] = useState("");
   const [visitPatterns, setVisitPatterns] = useState("");
   const [score, setScore] = useState<number | null>(null);
   const [lang, setLang] = useState<"en" | "ur">("en");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     // Simple scoring logic: Higher visits = lower score
     const visitCount = parseInt(visitPatterns) || 0;

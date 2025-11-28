@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 
 interface InventoryItem {
   id?: number;
@@ -8,7 +8,7 @@ interface InventoryItem {
   lowStockThreshold?: number;
 }
 
-const Inventory: React.FC = () => {
+const Inventory = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [form, setForm] = useState({
     itemName: "",
@@ -25,7 +25,7 @@ const Inventory: React.FC = () => {
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     fetch("http://localhost:5001/api/inventory", {
       method: "POST",

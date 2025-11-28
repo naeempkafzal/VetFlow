@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { format } from "date-fns";
 
 interface Vaccination {
@@ -9,7 +9,7 @@ interface Vaccination {
   status?: string;
 }
 
-const Vaccinations: React.FC = () => {
+const Vaccinations = () => {
   const [vaccinations, setVaccinations] = useState<Vaccination[]>([]);
   const [form, setForm] = useState({
     animalId: 0,
@@ -26,7 +26,7 @@ const Vaccinations: React.FC = () => {
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     fetch("/api/vaccinations", {
       method: "POST",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 
 interface Outbreak {
   id?: number;
@@ -8,7 +8,7 @@ interface Outbreak {
   advisory?: string;
 }
 
-const Outbreaks: React.FC = () => {
+const Outbreaks = () => {
   const [outbreaks, setOutbreaks] = useState<Outbreak[]>([]);
   const [form, setForm] = useState({
     disease: "",
@@ -25,7 +25,7 @@ const Outbreaks: React.FC = () => {
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     fetch("/api/outbreaks", {
       method: "POST",
