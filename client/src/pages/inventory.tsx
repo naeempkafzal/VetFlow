@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect } from "react";
 
 interface InventoryItem {
   id?: number;
@@ -25,51 +25,64 @@ const Inventory = ({ language }: { language: string }) => {
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    if (!form.itemName || form.quantity <= 0 || form.cost <= 0) {
+      alert(t("Please fill all fields correctly", "براہ کرم تمام فیلڈز صحیح طریقے سے بھریں"));
+      return;
+    }
+    
     fetch("http://localhost:5001/api/inventory", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     })
-      .then(() =>
-        fetch("http://localhost:5001/api/inventory")
-          .then((res) => res.json())
-          .then(setInventory),
-      )
+      .then(() => {
+        setForm({ itemName: "", quantity: 0, cost: 0, lowStockThreshold: 10 });
+        return fetch("http://localhost:5001/api/inventory");
+      })
+      .then((res) => res.json())
+      .then(setInventory)
       .catch((err) => console.error("Error adding inventory:", err));
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <button
-        onClick={() => setLang(lang === "en" ? "ur" : "en")}
-        className="mb-4 p-2 bg-blue-500 text-white rounded"
-      >
-        Switch Language (تبدیل زبان)
-      </button>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        {lang === "en" ? "Inventory Management" : "انوینٹری مینجمنٹ"}
+    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: "bold", color: "#1f2937", marginBottom: "24px" }}>
+        {t("Inventory Management", "انوینٹری مینجمنٹ")}
       </h1>
-      <form
-        onSubmit={handleSubmit}
-        className="p-6 rounded-lg shadow-md max-w-md bg-white"
+      
+      <div
+        style={{ 
+          padding: "24px", 
+          borderRadius: "8px", 
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", 
+          maxWidth: "448px", 
+          backgroundColor: "#fff",
+          marginBottom: "24px"
+        }}
       >
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en" ? "Item Name:" : "اشیاء کا نام:"}
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+            {t("Item Name:", "اشیاء کا نام:")}
           </label>
           <input
             type="text"
             value={form.itemName}
             onChange={(e) => setForm({ ...form, itemName: e.target.value })}
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
+            style={{ 
+              marginTop: "4px", 
+              padding: "8px", 
+              width: "100%", 
+              border: "1px solid #d1d5db", 
+              borderRadius: "4px",
+              fontSize: "14px"
+            }}
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en" ? "Quantity:" : "مقدار:"}
+        
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+            {t("Quantity:", "مقدار:")}
           </label>
           <input
             type="number"
@@ -77,13 +90,20 @@ const Inventory = ({ language }: { language: string }) => {
             onChange={(e) =>
               setForm({ ...form, quantity: parseInt(e.target.value) || 0 })
             }
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
+            style={{ 
+              marginTop: "4px", 
+              padding: "8px", 
+              width: "100%", 
+              border: "1px solid #d1d5db", 
+              borderRadius: "4px",
+              fontSize: "14px"
+            }}
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en" ? "Cost (PKR):" : "قیمت (PKR):"}
+        
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+            {t("Cost (PKR):", "قیمت (PKR):")}
           </label>
           <input
             type="number"
@@ -91,13 +111,20 @@ const Inventory = ({ language }: { language: string }) => {
             onChange={(e) =>
               setForm({ ...form, cost: parseFloat(e.target.value) || 0 })
             }
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
+            style={{ 
+              marginTop: "4px", 
+              padding: "8px", 
+              width: "100%", 
+              border: "1px solid #d1d5db", 
+              borderRadius: "4px",
+              fontSize: "14px"
+            }}
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en" ? "Low Stock Threshold:" : "کم اسٹاک کی حد:"}
+        
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#4b5563" }}>
+            {t("Low Stock Threshold:", "کم اسٹاک کی حد:")}
           </label>
           <input
             type="number"
@@ -108,36 +135,84 @@ const Inventory = ({ language }: { language: string }) => {
                 lowStockThreshold: parseInt(e.target.value) || 10,
               })
             }
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
+            style={{ 
+              marginTop: "4px", 
+              padding: "8px", 
+              width: "100%", 
+              border: "1px solid #d1d5db", 
+              borderRadius: "4px",
+              fontSize: "14px"
+            }}
           />
         </div>
+        
         <button
-          type="submit"
-          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={handleSubmit}
+          style={{ 
+            width: "100%", 
+            padding: "8px 16px", 
+            backgroundColor: "#2563eb", 
+            color: "#fff", 
+            borderRadius: "4px",
+            border: "none",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+            transition: "background-color 0.2s"
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#1d4ed8"}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#2563eb"}
         >
-          {lang === "en" ? "Add Item" : "آئٹم شامل کریں"}
+          {t("Add Item", "آئٹم شامل کریں")}
         </button>
-      </form>
-      <ul className="mt-6 space-y-4">
+      </div>
+      
+      <ul style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px", listStyle: "none", padding: 0 }}>
         {inventory.length === 0 ? (
-          <li className="text-gray-600">
-            {lang === "en"
-              ? "No inventory items found."
-              : "کوئی انوینٹری آئٹم نہیں ملی."}
+          <li style={{ color: "#4b5563", padding: "16px", backgroundColor: "#fff", borderRadius: "8px" }}>
+            {t("No inventory items found.", "کوئی انوینٹری آئٹم نہیں ملی.")}
           </li>
         ) : (
           inventory.map((item) => (
-            <li key={item.id} className="p-4 rounded-lg shadow-md bg-white">
-              <span className="text-gray-800">
-                {item.itemName || (lang === "en" ? "Unknown" : "نامعلوم")} -
-                Quantity: {item.quantity || 0} - Cost: {item.cost || 0} PKR
-              </span>
+            <li 
+              key={item.id} 
+              style={{ 
+                padding: "16px", 
+                borderRadius: "8px", 
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", 
+                backgroundColor: "#fff",
+                border: item.quantity != null && item.lowStockThreshold != null && item.quantity < item.lowStockThreshold 
+                  ? "2px solid #dc2626" 
+                  : "1px solid #e5e7eb"
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                <span style={{ color: "#1f2937", fontWeight: "600", fontSize: "16px" }}>
+                  {item.itemName || t("Unknown", "نامعلوم")}
+                </span>
+                <div style={{ display: "flex", gap: "16px", fontSize: "14px", color: "#4b5563" }}>
+                  <span>{t("Qty:", "مقدار:")} <strong>{item.quantity || 0}</strong></span>
+                  <span>{t("Cost:", "قیمت:")} <strong>{item.cost || 0} PKR</strong></span>
+                  <span>{t("Threshold:", "حد:")} <strong>{item.lowStockThreshold || 10}</strong></span>
+                </div>
+              </div>
               {item.quantity != null &&
                 item.lowStockThreshold != null &&
                 item.quantity < item.lowStockThreshold && (
-                  <span className="text-red-600 ml-2">
-                    {lang === "en" ? "(Low Stock)" : "(کم اسٹاک)"}
+                  <span 
+                    style={{ 
+                      color: "#dc2626", 
+                      marginLeft: "8px",
+                      fontWeight: "600",
+                      fontSize: "14px",
+                      display: "inline-block",
+                      marginTop: "8px",
+                      backgroundColor: "#fee2e2",
+                      padding: "4px 8px",
+                      borderRadius: "4px"
+                    }}
+                  >
+                    ⚠️ {t("Low Stock Alert", "کم اسٹاک الرٹ")}
                   </span>
                 )}
             </li>
