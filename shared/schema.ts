@@ -1,6 +1,9 @@
-import { pgTable, text, serial, integer, timestamp, boolean, decimal, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, boolean, decimal, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// --- Helpers ---
+const idCol = (name: string) => integer(name).primaryKey().generatedAlwaysAsIdentity();
 
 // --- Enums for Postgres ---
 export const statusEnum = pgEnum("status", ["Healthy", "Sick", "Quarantined", "Treated", "Recovered"]);
@@ -10,7 +13,7 @@ export const priorityEnum = pgEnum("priority", ["Low", "Medium", "High"]);
 // --- Tables ---
 
 export const animals = pgTable("animals", {
-  id: serial("id").primaryKey(),
+  id: idCol("id"),
   name: text("name").notNull(),
   species: text("species").notNull(),
   breed: text("breed"),
@@ -28,7 +31,7 @@ export const animals = pgTable("animals", {
 });
 
 export const visitRecords = pgTable("visit_records", {
-  id: serial("id").primaryKey(),
+  id: idCol("id"),
   animalId: integer("animal_id").references(() => animals.id).notNull(),
   visitDate: timestamp("visit_date").defaultNow().notNull(),
   type: text("type").notNull(), 
@@ -44,7 +47,7 @@ export const visitRecords = pgTable("visit_records", {
 });
 
 export const inventory = pgTable("inventory", {
-  id: serial("id").primaryKey(),
+  id: idCol("id"),
   itemName: text("item_name").notNull(),
   category: text("category").notNull(), 
   currentStock: integer("current_stock").notNull(),
@@ -59,7 +62,7 @@ export const inventory = pgTable("inventory", {
 });
 
 export const vaccinations = pgTable("vaccinations", {
-  id: serial("id").primaryKey(),
+  id: idCol("id"),
   animalId: integer("animal_id").references(() => animals.id).notNull(),
   vaccineName: text("vaccine_name").notNull(),
   batchNumber: text("batch_number"),
@@ -72,7 +75,7 @@ export const vaccinations = pgTable("vaccinations", {
 });
 
 export const outbreaks = pgTable("outbreaks", {
-  id: serial("id").primaryKey(),
+  id: idCol("id"),
   diseaseName: text("disease_name").notNull(),
   region: text("region").notNull(),
   severity: text("severity").notNull(), 
@@ -86,7 +89,7 @@ export const outbreaks = pgTable("outbreaks", {
 });
 
 export const appointments = pgTable("appointments", {
-  id: serial("id").primaryKey(),
+  id: idCol("id"),
   animalName: text("animal_name").notNull(),
   ownerName: text("owner_name").notNull(),
   contactNumber: text("contact_number"),
