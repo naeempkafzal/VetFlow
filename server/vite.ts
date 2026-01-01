@@ -1,11 +1,15 @@
-// vite.ts
+// server/vite.ts
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
-import viteConfig from "../vite.config"; // ADDED THIS LINE
+import viteConfig from "../vite.config";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const viteLogger = createLogger();
 
@@ -28,7 +32,7 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const vite = await createViteServer({
-    ...viteConfig, // Now this will work
+    ...(viteConfig as any),
     configFile: false,
     customLogger: {
       ...viteLogger,
