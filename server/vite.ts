@@ -5,6 +5,7 @@ import path from "path";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
+import viteConfig from "../vite.config"; // ADDED THIS LINE
 
 const viteLogger = createLogger();
 
@@ -27,7 +28,7 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const vite = await createViteServer({
-    ...viteConfig,
+    ...viteConfig, // Now this will work
     configFile: false,
     customLogger: {
       ...viteLogger,
@@ -50,7 +51,7 @@ export async function setupVite(app: Express, server: Server) {
         "..",
         "client",
         "index.html",
-      ); // Changed import.meta.dirname to __dirname
+      );
 
       if (!fs.existsSync(clientTemplate)) {
         throw new Error(`Template file not found: ${clientTemplate}`);
@@ -71,7 +72,7 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public"); // Changed import.meta.dirname to __dirname
+  const distPath = path.resolve(__dirname, "public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(

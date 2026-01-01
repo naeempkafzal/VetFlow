@@ -1,192 +1,154 @@
-// schema.ts
-import { sql } from "drizzle-orm";
-import {
-  pgTable,
-  text,
-  varchar,
-  integer,
-  real,
-  boolean,
-  timestamp,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, decimal, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// --- Enums for Postgres ---
+export const statusEnum = pgEnum("status", ["Healthy", "Sick", "Quarantined", "Treated", "Recovered"]);
+export const severityEnum = pgEnum("severity", ["Low", "Moderate", "High", "Critical"]);
+export const priorityEnum = pgEnum("priority", ["Low", "Medium", "High"]);
+
+// --- Tables ---
+
 export const animals = pgTable("animals", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  species: text("species").notNull(), // cow, buffalo, goat, dog, cat
+  species: text("species").notNull(),
   breed: text("breed"),
-  age: integer("age"),
-  weight: real("weight"),
   gender: text("gender"),
-  ownerName: text("owner_name").notNull(),
-  ownerPhone: text("owner_phone"),
-  ownerAddress: text("owner_address"),
-  location: text("location"), // province/city
-  registrationDate: timestamp("registration_date").defaultNow(),
-  isActive: boolean("is_active").default(true),
+  dateOfBirth: timestamp("date_of_birth"),
+  weight: decimal("weight", { precision: 10, scale: 2 }),
+  status: text("status").default("Healthy"),
+  ownerId: integer("owner_id"),
+  imageUrl: text("image_url"),
+  tags: text("tags").array(),
+  lastVaccinationDate: timestamp("last_vaccination_date"),
+  isQuarantined: boolean("is_quarantined").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const visitRecords = pgTable("visit_records", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  animalId: varchar("animal_id")
-    .references(() => animals.id)
-    .notNull(),
-  visitDate: timestamp("visit_date").defaultNow(),
-  symptoms: text("symptoms"),
-  diagnosis: text("diagnosis"),
+  id: serial("id").primaryKey(),
+  animalId: integer("animal_id").references(() => animals.id).notNull(),
+  visitDate: timestamp("visit_date").defaultNow().notNull(),
+  type: text("type").notNull(), 
+  diagnosis: text("diagnosis").notNull(),
   treatment: text("treatment"),
-  medications: text("medications"), // JSON string
-  cost: real("cost"),
+  prescriptions: text("prescriptions"),
   notes: text("notes"),
-  veterinarianName: text("veterinarian_name"),
-});
-
-export const vaccinations = pgTable("vaccinations", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  animalId: varchar("animal_id")
-    .references(() => animals.id)
-    .notNull(),
-  vaccineName: text("vaccine_name").notNull(),
-  vaccineNameUrdu: text("vaccine_name_urdu"),
-  dateGiven: timestamp("date_given").notNull(),
-  nextDueDate: timestamp("next_due_date"),
-  batchNumber: text("batch_number"),
-  cost: real("cost"),
-  veterinarianName: text("veterinarian_name"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  cost: decimal("cost", { precision: 10, scale: 2 }),
+  veterinarian: text("veterinarian"),
+  location: text("location"),
 });
 
 export const inventory = pgTable("inventory", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
+  id: serial("id").primaryKey(),
   itemName: text("item_name").notNull(),
-  itemNameUrdu: text("item_name_urdu"),
-  category: text("category").notNull(), // vaccine, medicine, equipment
+  category: text("category").notNull(), 
   currentStock: integer("current_stock").notNull(),
   minStockLevel: integer("min_stock_level").notNull(),
-  unit: text("unit").notNull(), // vials, tablets, ml, etc
-  costPerUnit: real("cost_per_unit"),
-  supplier: text("supplier"),
+  unit: text("unit").notNull(), 
   expiryDate: timestamp("expiry_date"),
+  supplier: text("supplier"),
+  sku: text("sku").unique(),
   lastRestocked: timestamp("last_restocked").defaultNow(),
+  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }),
+  storageInstructions: text("storage_instructions"),
 });
 
-export const appointments = pgTable("appointments", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  animalId: varchar("animal_id").references(() => animals.id),
-  ownerName: text("owner_name").notNull(),
-  ownerPhone: text("owner_phone").notNull(),
-  appointmentDate: timestamp("appointment_date").notNull(),
-  purpose: text("purpose").notNull(),
-  status: text("status").default("scheduled"), // scheduled, completed, cancelled
+export const vaccinations = pgTable("vaccinations", {
+  id: serial("id").primaryKey(),
+  animalId: integer("animal_id").references(() => animals.id).notNull(),
+  vaccineName: text("vaccine_name").notNull(),
+  batchNumber: text("batch_number"),
+  dateGiven: timestamp("date_given").defaultNow().notNull(),
+  nextDueDate: timestamp("next_due_date").notNull(),
+  administeredBy: text("administered_by"),
+  dosage: text("dosage"),
+  sideEffects: text("side_effects"),
   notes: text("notes"),
-  reminderSent: boolean("reminder_sent").default(false),
 });
 
 export const outbreaks = pgTable("outbreaks", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
+  id: serial("id").primaryKey(),
   diseaseName: text("disease_name").notNull(),
-  diseaseNameUrdu: text("disease_name_urdu"),
-  location: text("location").notNull(),
-  province: text("province").notNull(),
-  latitude: real("latitude"),
-  longitude: real("longitude"),
-  affectedAnimals: integer("affected_animals").notNull(),
-  species: text("species").notNull(),
-  reportDate: timestamp("report_date").defaultNow(),
-  reportedBy: text("reported_by").notNull(),
-  severity: text("severity").notNull(), // low, medium, high, critical
-  status: text("status").default("active"), // active, contained, resolved
-  biosafetyMeasures: text("biosafety_measures"),
+  region: text("region").notNull(),
+  severity: text("severity").notNull(), 
+  status: text("status").notNull(), 
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  endDate: timestamp("end_date"),
+  reportedCases: integer("reported_cases").default(1),
+  confirmedCases: integer("confirmed_cases").default(0),
+  affectedSpecies: text("affected_species").notNull(),
+  containmentMeasures: text("containment_measures"),
 });
 
-// Insert schemas
+export const appointments = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+  animalName: text("animal_name").notNull(),
+  ownerName: text("owner_name").notNull(),
+  contactNumber: text("contact_number"),
+  email: text("email"),
+  appointmentDate: timestamp("appointment_date").notNull(),
+  durationMinutes: integer("duration_minutes").default(30),
+  reason: text("reason").notNull(),
+  status: text("status").default("Scheduled"), 
+  priority: text("priority").default("Medium"), 
+  notes: text("notes"),
+});
+
+// --- Zod Insert Schemas (For Validation) ---
+
 export const insertAnimalSchema = createInsertSchema(animals, {
-  age: z.number().optional(),
-  weight: z.number().optional(),
-  breed: z.string().optional(),
-  gender: z.string().optional(),
-  ownerPhone: z.string().optional(),
-  ownerAddress: z.string().optional(),
-  location: z.string().optional(),
-}).omit({
-  id: true,
-  registrationDate: true,
-});
+  dateOfBirth: z.coerce.date(),
+  lastVaccinationDate: z.coerce.date().nullable(),
+  weight: z.string().or(z.number()).optional(),
+}).omit({ id: true, createdAt: true });
 
-export const insertVisitRecordSchema = createInsertSchema(visitRecords, {
-  symptoms: z.string().optional(),
-  treatment: z.string().optional(),
-  medications: z.string().optional(),
-  cost: z.number().optional(),
-  notes: z.string().optional(),
-  veterinarianName: z.string().optional(),
-}).omit({
-  id: true,
-  visitDate: true,
-});
-
-export const insertVaccinationSchema = createInsertSchema(vaccinations, {
-  vaccineNameUrdu: z.string().optional(),
-  nextDueDate: z.date().optional(),
-  batchNumber: z.string().optional(),
-  cost: z.number().optional(),
-  veterinarianName: z.string().optional(),
-}).omit({
-  id: true,
-});
+export const insertVisitSchema = createInsertSchema(visitRecords, {
+  visitDate: z.coerce.date(),
+  followUpDate: z.coerce.date().nullable(),
+  cost: z.string().or(z.number()),
+}).omit({ id: true });
 
 export const insertInventorySchema = createInsertSchema(inventory, {
-  itemNameUrdu: z.string().optional(),
-  costPerUnit: z.number().optional(),
-  supplier: z.string().optional(),
-  expiryDate: z.date().optional(),
-}).omit({
-  id: true,
-  lastRestocked: true,
-});
+  expiryDate: z.coerce.date().nullable(),
+  lastRestocked: z.coerce.date(),
+  pricePerUnit: z.string().or(z.number()),
+}).omit({ id: true });
 
-export const insertAppointmentSchema = createInsertSchema(appointments, {
-  animalId: z.string().optional(),
-  notes: z.string().optional(),
-  status: z.string().optional(),
-  reminderSent: z.boolean().optional(),
-}).omit({
-  id: true,
-});
+export const insertVaccinationSchema = createInsertSchema(vaccinations, {
+  dateGiven: z.coerce.date(),
+  nextDueDate: z.coerce.date(),
+}).omit({ id: true });
 
 export const insertOutbreakSchema = createInsertSchema(outbreaks, {
-  diseaseNameUrdu: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  biosafetyMeasures: z.string().optional(),
-}).omit({
-  id: true,
-  reportDate: true,
-});
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date().nullable(),
+}).omit({ id: true });
 
-// Types
+export const insertAppointmentSchema = createInsertSchema(appointments, {
+  appointmentDate: z.coerce.date(),
+}).omit({ id: true });
+
+// --- TypeScript Types (For the Frontend) ---
+
 export type Animal = typeof animals.$inferSelect;
 export type InsertAnimal = z.infer<typeof insertAnimalSchema>;
+
 export type VisitRecord = typeof visitRecords.$inferSelect;
-export type InsertVisitRecord = z.infer<typeof insertVisitRecordSchema>;
+export type InsertVisit = z.infer<typeof insertVisitSchema>;
+
+export type InventoryItem = typeof inventory.$inferSelect;
+export type InsertInventory = z.infer<typeof insertInventorySchema>;
+
 export type Vaccination = typeof vaccinations.$inferSelect;
 export type InsertVaccination = z.infer<typeof insertVaccinationSchema>;
-export type Inventory = typeof inventory.$inferSelect;
-export type InsertInventory = z.infer<typeof insertInventorySchema>;
-export type Appointment = typeof appointments.$inferSelect;
-export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
+
 export type Outbreak = typeof outbreaks.$inferSelect;
 export type InsertOutbreak = z.infer<typeof insertOutbreakSchema>;
+
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;

@@ -1,32 +1,13 @@
-import Database from "better-sqlite3";
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from 'ws';
+import * as schema from "@shared/schema";
 
-const db = new Database("vet.db");
+neonConfig.webSocketConstructor = ws;
 
-// Initialize tables
-db.prepare(
-  "CREATE TABLE IF NOT EXISTS animals (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, ownerName TEXT, species TEXT, breed TEXT, location TEXT)",
-).run();
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL must be set in environment variables.");
+}
 
-db.prepare(
-  "CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, animalId INTEGER, symptoms TEXT, diagnosis TEXT, treatment TEXT, medications TEXT, notes TEXT, veterinarianName TEXT)",
-).run();
-
-db.prepare(
-  "CREATE TABLE IF NOT EXISTS vaccinations (id INTEGER PRIMARY KEY AUTOINCREMENT, animalId INTEGER, vaccineType TEXT, dueDate TEXT, status TEXT)",
-).run();
-
-db.prepare(
-  "CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, itemName TEXT, quantity INTEGER, cost REAL, lowStockThreshold INTEGER)",
-).run();
-
-db.prepare(
-  "CREATE TABLE IF NOT EXISTS appointments (id INTEGER PRIMARY KEY AUTOINCREMENT, animalId INTEGER, ownerName TEXT, dateTime TEXT, reason TEXT)",
-).run();
-
-db.prepare(
-  "CREATE TABLE IF NOT EXISTS outbreaks (id INTEGER PRIMARY KEY AUTOINCREMENT, disease TEXT, geoCoordinates TEXT, province TEXT, advisory TEXT)",
-).run();
-
-db.close();
-
-console.log("Database initialized successfully");
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const db = drizzle(pool, { schema });

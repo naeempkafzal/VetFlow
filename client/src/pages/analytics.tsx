@@ -5,18 +5,18 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
-import { useTranslation } from "../lib/translations";
-import { Animal, VisitRecord, Vaccination } from "../../shared/schema";
+} from "@/components/ui/select";
+import { useTranslation } from "@/lib/translations";
+import { type Animal, type VisitRecord, type Vaccination } from "@shared/schema";
 import {
   BarChart3,
   TrendingUp,
@@ -64,18 +64,19 @@ export default function Analytics({ language = "en" }: { language?: string }) {
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("3months");
   const [selectedSpecies, setSelectedSpecies] = useState<string>("all");
 
+  // Fixed Query Keys to use relative paths for the proxy
   const { data: animals = [] } = useQuery<Animal[]>({
-    queryKey: ["http://localhost:5001/api/animals"],
+    queryKey: ["/api/animals"],
     retry: false,
   });
 
   const { data: visitRecords = [] } = useQuery<VisitRecord[]>({
-    queryKey: ["http://localhost:5001/api/visit-records"],
+    queryKey: ["/api/visit-records"],
     retry: false,
   });
 
   const { data: vaccinations = [] } = useQuery<Vaccination[]>({
-    queryKey: ["http://localhost:5001/api/vaccinations"],
+    queryKey: ["/api/vaccinations"],
     retry: false,
   });
 
@@ -89,6 +90,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
           (visit) => visit.animalId === animal.id,
         );
         const recentVisits = animalVisits.filter((visit) => {
+          if (!visit.visitDate) return false;
           const visitDate = new Date(visit.visitDate);
           const timeframeDays =
             selectedTimeframe === "1month"
@@ -103,12 +105,10 @@ export default function Analytics({ language = "en" }: { language?: string }) {
 
         const baselineDaily = animal.species === "cow" ? 15 : 12;
         const illnessDays = recentVisits.reduce((total, visit) => {
-          if (visit.diagnosis?.toLowerCase().includes("mastitis"))
-            return total + 7;
-          if (visit.diagnosis?.toLowerCase().includes("fever"))
-            return total + 3;
-          if (visit.diagnosis?.toLowerCase().includes("septicaemia"))
-            return total + 14;
+          const diag = visit.diagnosis?.toLowerCase() || "";
+          if (diag.includes("mastitis")) return total + 7;
+          if (diag.includes("fever")) return total + 3;
+          if (diag.includes("septicaemia")) return total + 14;
           return total + 2;
         }, 0);
 
@@ -118,7 +118,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
         const lossPercentage =
           ((baselineDaily - currentDaily) / baselineDaily) * 100;
         const estimatedLoss =
-          (baselineDaily - currentDaily) * 120 * illnessDays;
+          (baselineDaily - currentDaily) * 120 * (illnessDays || 1);
 
         return {
           animalId: animal.id,
@@ -149,16 +149,16 @@ export default function Analytics({ language = "en" }: { language?: string }) {
         );
 
         let score = 100;
-        const lastVisit = animalVisits.sort(
+        const lastVisit = [...animalVisits].sort(
           (a, b) =>
-            new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
+            new Date(b.visitDate || 0).getTime() - new Date(a.visitDate || 0).getTime(),
         )[0];
 
         if (!lastVisit) {
           score -= 30;
         } else {
           const daysSinceVisit = Math.floor(
-            (new Date().getTime() - new Date(lastVisit.visitDate).getTime()) /
+            (new Date().getTime() - new Date(lastVisit.visitDate!).getTime()) /
               (1000 * 60 * 60 * 24),
           );
           if (daysSinceVisit > 365) score -= 25;
@@ -166,7 +166,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
         }
 
         const rabiesVacc = animalVaccinations.find((v) =>
-          v.vaccineName.includes("Rabies"),
+          v.vaccineName.toLowerCase().includes("rabies"),
         );
         let vaccinationStatus: "up-to-date" | "overdue" | "none" = "none";
 
@@ -216,7 +216,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
           animalName: animal.name,
           species: animal.species,
           score: Math.max(0, Math.min(100, score)),
-          lastVisit: lastVisit ? new Date(lastVisit.visitDate) : undefined,
+          lastVisit: lastVisit?.visitDate ? new Date(lastVisit.visitDate) : undefined,
           vaccinationStatus,
           healthTrend,
         };
@@ -252,8 +252,8 @@ export default function Analytics({ language = "en" }: { language?: string }) {
               .some((otherVisit) => {
                 const daysDiff =
                   Math.abs(
-                    new Date(visit.visitDate).getTime() -
-                      new Date(otherVisit.visitDate).getTime(),
+                    new Date(visit.visitDate!).getTime() -
+                      new Date(otherVisit.visitDate!).getTime(),
                   ) /
                   (1000 * 60 * 60 * 24);
                 return (
@@ -267,7 +267,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
           0,
         );
 
-        const lastTreatment = animalVisits
+        const lastTreatment = [...animalVisits]
           .filter(
             (visit) =>
               visit.treatment?.toLowerCase().includes("antibiotic") ||
@@ -275,7 +275,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
           )
           .sort(
             (a, b) =>
-              new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
+              new Date(b.visitDate!).getTime() - new Date(a.visitDate!).getTime(),
           )[0];
 
         const riskFactors: string[] = [];
@@ -307,7 +307,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
           riskLevel,
           antibioticTreatments,
           repeatedTreatments,
-          lastTreatmentDate: lastTreatment
+          lastTreatmentDate: lastTreatment?.visitDate
             ? new Date(lastTreatment.visitDate)
             : undefined,
           riskFactors,
@@ -496,39 +496,39 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                   .map((metric, index) => (
                     <div
                       key={metric.animalId}
-                      style={{ padding: "16px", border: "1px solid #334155", borderRadius: "8px", backgroundColor: "#1e293b" }}
+                      style={{ padding: "16px", border: "1px solid #e2e8f0", borderRadius: "8px", backgroundColor: "#f8fafc" }}
                       data-testid={`productivity-${index}`}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                         <h4 style={{ fontWeight: "500", color: "#1f2937" }}>
                           {metric.animalName}
                         </h4>
-                        <Badge style={{ textTransform: "capitalize", color: "#4b5563" }}>
+                        <Badge style={{ textTransform: "capitalize", color: "#4b5563", backgroundColor: "#fff" }}>
                           {metric.species}
                         </Badge>
                       </div>
 
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "16px", fontSize: "14px" }}>
                         <div>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur"
                               ? "بنیادی پیداوار:"
                               : "Baseline:"}
                           </span>
-                          <p style={{ fontWeight: "500", color: "#f1f5f9" }}>
+                          <p style={{ fontWeight: "500", color: "#1e293b" }}>
                             {metric.baselineProductivity} L/day
                           </p>
                         </div>
                         <div>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur" ? "موجودہ پیداوار:" : "Current:"}
                           </span>
-                          <p style={{ fontWeight: "500", color: "#f1f5f9" }}>
+                          <p style={{ fontWeight: "500", color: "#1e293b" }}>
                             {metric.currentProductivity.toFixed(1)} L/day
                           </p>
                         </div>
                         <div>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur" ? "نقصان:" : "Loss:"}
                           </span>
                           <p style={{ fontWeight: "500", color: "#dc2626" }}>
@@ -536,7 +536,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                           </p>
                         </div>
                         <div>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur"
                               ? "مالی نقصان:"
                               : "Financial Loss:"}
@@ -548,7 +548,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                       </div>
 
                       {metric.illnessDays > 0 && (
-                        <p style={{ fontSize: "12px", color: "#4b5563", marginTop: "8px" }}>
+                        <p style={{ fontSize: "12px", color: "#64748b", marginTop: "8px" }}>
                           {language === "ur"
                             ? `بیماری کے دن: ${metric.illnessDays}`
                             : `Illness days: ${metric.illnessDays}`}
@@ -583,7 +583,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                   .map((welfare, index) => (
                     <div
                       key={welfare.animalId}
-                      style={{ padding: "16px", border: "1px solid #334155", borderRadius: "8px", backgroundColor: "#1e293b" }}
+                      style={{ padding: "16px", border: "1px solid #e2e8f0", borderRadius: "8px", backgroundColor: "#f8fafc" }}
                       data-testid={`welfare-${index}`}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
@@ -594,7 +594,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                           <Badge style={getWelfareColor(welfare.score)}>
                             {welfare.score.toFixed(0)}/100
                           </Badge>
-                          <Badge style={{ textTransform: "capitalize", color: "#4b5563" }}>
+                          <Badge style={{ textTransform: "capitalize", color: "#4b5563", backgroundColor: "#fff" }}>
                             {welfare.species}
                           </Badge>
                         </div>
@@ -602,10 +602,10 @@ export default function Analytics({ language = "en" }: { language?: string }) {
 
                       <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur" ? "آخری ملاقات:" : "Last Visit:"}
                           </span>
-                          <span>
+                          <span style={{ color: "#1e293b" }}>
                             {welfare.lastVisit
                               ? welfare.lastVisit.toLocaleDateString()
                               : language === "ur"
@@ -614,11 +614,12 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                           </span>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur" ? "ویکسینیشن:" : "Vaccination:"}
                           </span>
                           <Badge style={{
-                            color: welfare.vaccinationStatus === "up-to-date" ? "#16a34a" : welfare.vaccinationStatus === "overdue" ? "#ea580c" : "#dc2626"
+                            color: welfare.vaccinationStatus === "up-to-date" ? "#16a34a" : welfare.vaccinationStatus === "overdue" ? "#ea580c" : "#dc2626",
+                            backgroundColor: "transparent"
                           }}>
                             {welfare.vaccinationStatus === "up-to-date" &&
                               (language === "ur" ? "اپ ٹو ڈیٹ" : "Up to date")}
@@ -629,7 +630,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                           </Badge>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur"
                               ? "صحت کا رجحان:"
                               : "Health Trend:"}
@@ -688,7 +689,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                   .map((risk, index) => (
                     <div
                       key={risk.animalId}
-                      style={{ padding: "16px", border: "1px solid #334155", borderRadius: "8px", backgroundColor: "#1e293b" }}
+                      style={{ padding: "16px", border: "1px solid #e2e8f0", borderRadius: "8px", backgroundColor: "#f8fafc" }}
                       data-testid={`amr-risk-${index}`}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
@@ -705,7 +706,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
 
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "14px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur"
                               ? "اینٹی بائیوٹک کا استعمال:"
                               : "Antibiotic Treatments:"}
@@ -715,7 +716,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                           </span>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: "#4b5563" }}>
+                          <span style={{ color: "#64748b" }}>
                             {language === "ur"
                               ? "دوبارہ علاج:"
                               : "Repeated Treatments:"}
@@ -726,12 +727,12 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                         </div>
                         {risk.lastTreatmentDate && (
                           <div style={{ display: "flex", justifyContent: "space-between" }}>
-                            <span style={{ color: "#4b5563" }}>
+                            <span style={{ color: "#64748b" }}>
                               {language === "ur"
                                 ? "آخری علاج:"
                                 : "Last Treatment:"}
                             </span>
-                            <span>
+                            <span style={{ color: "#1e293b" }}>
                               {risk.lastTreatmentDate.toLocaleDateString()}
                             </span>
                           </div>
@@ -739,7 +740,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
 
                         {risk.riskFactors.length > 0 && (
                           <div style={{ marginTop: "8px" }}>
-                            <p style={{ fontSize: "12px", color: "#4b5563", marginBottom: "4px" }}>
+                            <p style={{ fontSize: "12px", color: "#64748b", marginBottom: "4px" }}>
                               {language === "ur"
                                 ? "خطرے کے عوامل:"
                                 : "Risk Factors:"}
@@ -748,7 +749,7 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                               {risk.riskFactors.map((factor, factorIndex) => (
                                 <Badge
                                   key={factorIndex}
-                                  style={{ fontSize: "12px", color: "#4b5563" }}
+                                  style={{ fontSize: "12px", color: "#64748b", backgroundColor: "#fff" }}
                                 >
                                   {factor}
                                 </Badge>
@@ -769,70 +770,9 @@ export default function Analytics({ language = "en" }: { language?: string }) {
                 </div>
               )}
             </div>
-
-            {amrRisks.filter((risk) => risk.riskLevel !== "low").length > 6 && (
-              <div style={{ marginTop: "16px", textAlign: "center" }}>
-                <Button variant="outline" size="sm" data-testid="view-more-amr">
-                  {language === "ur" ? "مزید دیکھیں" : "View More"}
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
-
-      <Card style={{ marginTop: "24px" }}>
-        <CardHeader>
-          <CardTitle style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <TrendingUp style={{ height: "20px", width: "20px", color: "#2563eb" }} />
-            {language === "ur" ? "سفارشات" : "Recommendations"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
-            {totalProductivityLoss > 10000 && (
-              <div style={{ padding: "16px", backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px" }}>
-                <h4 style={{ fontWeight: "500", color: "#991b1b", marginBottom: "8px" }}>
-                  {language === "ur"
-                    ? "پیداوار میں بہتری"
-                    : "Productivity Improvement"}
-                </h4>
-                <p style={{ fontSize: "14px", color: "#b91c1c" }}>
-                  {language === "ur"
-                    ? "ماسٹائٹس کی روک تھام پر توجہ دیں اور حفظان صحت بہتر بنائیں"
-                    : "Focus on mastitis prevention and improve hygiene protocols"}
-                </p>
-              </div>
-            )}
-
-            {averageWelfareScore < 70 && (
-              <div style={{ padding: "16px", backgroundColor: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "8px" }}>
-                <h4 style={{ fontWeight: "500", color: "#92400e", marginBottom: "8px" }}>
-                  {language === "ur" ? "فلاحی بہتری" : "Welfare Improvement"}
-                </h4>
-                <p style={{ fontSize: "14px", color: "#b45309" }}>
-                  {language === "ur"
-                    ? "باقاعدہ ویکسینیشن اور چیک اپ کا شیڈول بنائیں"
-                    : "Schedule regular vaccinations and health checkups"}
-                </p>
-              </div>
-            )}
-
-            {highRiskAnimals > 0 && (
-              <div style={{ padding: "16px", backgroundColor: "#fefce8", border: "1px solid #fef08a", borderRadius: "8px" }}>
-                <h4 style={{ fontWeight: "500", color: "#713f12", marginBottom: "8px" }}>
-                  {language === "ur" ? "AMR کا انتظام" : "AMR Management"}
-                </h4>
-                <p style={{ fontSize: "14px", color: "#854d0e" }}>
-                  {language === "ur"
-                    ? "اینٹی بائیوٹک کا محتاط استعمال اور کلچر ٹیسٹ کروائیں"
-                    : "Practice prudent antibiotic use and conduct culture tests"}
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
