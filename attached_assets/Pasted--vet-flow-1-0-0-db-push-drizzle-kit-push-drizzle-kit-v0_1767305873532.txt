@@ -1,0 +1,121 @@
+> vet-flow@1.0.0 db:push
+> drizzle-kit push
+
+drizzle-kit: v0.21.4
+drizzle-orm: v0.30.10
+
+No config path provided, using default path
+Reading config file '/home/runner/workspace/drizzle.config.ts'
+Using '@neondatabase/serverless' driver for database querying
+[Warning] '@neondatabase/serverless' can only connect to remote Neon/Vercel Postgres/Supabase instances through a websocket
+
++ date_of_birth column will be created
+
++ status column will be created
+
++ owner_id column will be created
+
++ image_url column will be created
+
++ tags column will be created
+
++ last_vaccination_date column will be created
+
++ is_quarantined column will be created
+
++ notes column will be created
+
++ created_at column will be created
+--- all columns conflicts in animals table resolved ---
+
+
++ animal_name column will be created
+
++ contact_number column will be created
+
++ email column will be created
+
++ duration_minutes column will be created
+
++ reason column will be created
+
++ priority column will be created
+--- all columns conflicts in appointments table resolved ---
+
+
++ sku column will be created
+
++ price_per_unit column will be created
+
++ storage_instructions column will be created
+--- all columns conflicts in inventory table resolved ---
+
+
++ region column will be created
+
++ start_date column will be created
+
++ end_date column will be created
+
++ reported_cases column will be created
+
++ confirmed_cases column will be created
+
++ affected_species column will be created
+
++ containment_measures column will be created
+--- all columns conflicts in outbreaks table resolved ---
+
+
++ administered_by column will be created
+
++ dosage column will be created
+
++ side_effects column will be created
+
++ notes column will be created
+--- all columns conflicts in vaccinations table resolved ---
+
+
++ type column will be created
+
++ prescriptions column will be created
+
++ follow_up_required column will be created
+
++ follow_up_date column will be created
+
++ veterinarian column will be created
+
++ location column will be created
+--- all columns conflicts in visit_records table resolved ---
+
+error: type "serial" does not exist
+    at sn.parseErrorMessage (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:86285:15)
+    at sn.handlePacket (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:86124:27)
+    at sn.parse (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:86052:28)
+    at E2.<anonymous> (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:86313:40)
+    at E2.emit (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:83613:11)
+    at _WebSocket.<anonymous> (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:85578:22)
+    at callListener (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:44318:18)
+    at _WebSocket.onMessage (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:44253:13)
+    at _WebSocket.emit (node:events:524:28)
+    at Receiver3.receiverOnMessage (/home/runner/workspace/node_modules/drizzle-kit/bin.cjs:45323:24) {
+  length: 89,
+  severity: 'ERROR',
+  code: '42704',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_type.c',
+  line: '274',
+  routine: 'typenameType'
+}
