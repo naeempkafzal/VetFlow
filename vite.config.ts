@@ -3,10 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
-/**
- * VetFlow Build Configuration
- * Resolves: React 18/19 conflicts, Shared Folder pathing, and Vercel Deployment
- */
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -14,19 +11,17 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      // Allows imports like "@/components/..."
+      // Standard src alias
       "@": path.resolve(__dirname, "./src"),
-      // Allows imports like "@shared/schema" from the shared folder
-      "@shared": path.resolve(__dirname, "./shared"), 
+      // Critical: Points to your shared folder for schema imports
+      "@shared": path.resolve(__dirname, "./shared"),
     },
   },
   build: {
-    // Standard Vercel output directory
     outDir: 'dist',
-    // Cleans the folder before every build to prevent old error files from sticking
     emptyOutDir: true,
-    // Ensures large files don't crash the free-tier build
-    chunkSizeWarningLimit: 1000,
+    // TypeScript builds can be heavy; this prevents memory crashes on Vercel's free tier
+    sourcemap: false,
   },
   server: {
     port: 3000,
