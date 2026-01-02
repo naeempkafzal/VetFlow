@@ -1,0 +1,62 @@
+The reason Vercel is struggling with your PostCSS config is a format mismatch.
+
+You are using "type": "module" in your package.json, which tells the system to treat all .js files as modern ES Modules. However, your postcss.config.js uses module.exports, which is the old CommonJS format. This causes a crash because Vercel (and Vite) expects an export default when "type: module" is active.
+
+Additionally, your tailwind.config.ts is pointing to a ./client directory, but your build logs show you are running Vite inside the client folder already.
+
+Here is the fix to align all files:
+
+1. The PostCSS Fix (Rename & Update)
+Rename postcss.config.js to postcss.config.mjs and use this code:
+
+JavaScript
+
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+2. The Tailwind Config Fix
+Since your vite.config.ts and package.json are likely inside the client folder (based on your logs), the path ./client/... in your content array might be "looking for a folder inside itself." Update it to be relative to the config file:
+
+TypeScript
+
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  // Use "./src" or "./index.html" if the config is inside the client folder
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["Georgia", "serif"],
+        mono: ["Menlo", "monospace"],
+        urdu: ["Noto Nastaliq Urdu", "Amiri", "serif"],
+      },
+    },
+  },
+  plugins: [],
+};
+
+export default config;
+3. Update package.json Dependencies
+Vercel needs the PostCSS tools installed explicitly to run that config. Ensure these are in your devDependencies in package.json:
+
+JSON
+
+"devDependencies": {
+  "postcss": "^8.4.0",
+  "autoprefixer": "^10.4.0",
+  "tailwindcss": "^3.4.0", 
+  ...
+}
+Note: If you are using Tailwind v4 (as seen in your previous vite.config.ts), you should actually delete postcss.config.js and tailwind.config.ts entirely. Tailwind v4 handles everything via the Vite plugin. If you want to keep these files, you must use Tailwind v3.
+
+Summary of Isolation:
+The Conflict: package.json says "Module", but PostCSS file uses "CommonJS".
+
+The Solution: Rename to .mjs or change module.exports to export default.
+
+The Pathing: Ensure tailwind.config.ts content paths match where your files actually sit on GitHub.
