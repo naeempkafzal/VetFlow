@@ -1,0 +1,40 @@
+22:24:52.572 Running build in Washington, D.C., USA (East) – iad1
+22:24:52.573 Build machine configuration: 2 cores, 8 GB
+22:24:52.702 Cloning github.com/naeempkafzal/VetFlow (Branch: main, Commit: 1a774db)
+22:24:52.703 Previous build caches not available.
+22:24:52.910 Cloning completed: 208.000ms
+22:24:53.907 Running "vercel build"
+22:24:54.332 Vercel CLI 50.1.3
+22:24:55.060 Installing dependencies...
+22:24:56.975 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+22:24:56.987 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+22:25:00.117 
+22:25:00.118 added 124 packages in 5s
+22:25:00.119 
+22:25:00.119 16 packages are looking for funding
+22:25:00.119   run `npm fund` for details
+22:25:00.163 Running "npm run build"
+22:25:00.266 
+22:25:00.266 > vetflow@1.0.0 build
+22:25:00.266 > vite build
+22:25:00.266 
+22:25:00.667 [36mvite v6.4.1 [32mbuilding for production...[36m[39m
+22:25:00.747 transforming...
+22:25:00.758 [32m✓[39m 2 modules transformed.
+22:25:00.763 [31m✗[39m Build failed in 54ms
+22:25:00.764 [31merror during build:
+22:25:00.764 [31m[vite]: Rollup failed to resolve import "@tanstack/react-query" from "/vercel/path0/client/src/main.tsx".
+22:25:00.765 This is most likely unintended because it can break your application at runtime.
+22:25:00.765 If you do want to externalize this module explicitly add it to
+22:25:00.765 `build.rollupOptions.external`[31m
+22:25:00.765     at viteLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46374:15)
+22:25:00.766     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46432:18
+22:25:00.766     at onwarn (file:///vercel/path0/node_modules/@vitejs/plugin-react/dist/index.js:90:7)
+22:25:00.766     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46430:7
+22:25:00.766     at onRollupLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46422:5)
+22:25:00.766     at onLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46072:7)
+22:25:00.767     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21032:32
+22:25:00.767     at Object.logger [as onLog] (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:22919:9)
+22:25:00.767     at ModuleLoader.handleInvalidResolvedId (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21663:26)
+22:25:00.768     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21621:26[39m
+22:25:00.788 Error: Command "npm run build" exited with 1
