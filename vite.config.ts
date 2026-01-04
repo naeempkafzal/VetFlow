@@ -11,13 +11,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      // These aliases now point specifically to where your source code lives
       "@": path.resolve(__dirname, "client/src"),
       "@shared": path.resolve(__dirname, "shared"),
     },
   },
   build: {
-    // Vercel expects the build output in a folder named 'dist' by default
     outDir: "dist",
     emptyOutDir: true,
   },

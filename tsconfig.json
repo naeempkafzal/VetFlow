@@ -20,7 +20,7 @@
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"]
     },
-    "types": ["node", "express"]
+    "types": ["node", "express", "vite", "@vitejs/plugin-react"]
   },
   "include": [
     "client/src/**/*.ts", 
@@ -29,6 +29,7 @@
     "server/**/*.ts",
     "server/index.ts",
     "api/**/*.ts",
+    "vite.config.ts",
     "*.d.ts"
   ],
   "exclude": ["node_modules"]

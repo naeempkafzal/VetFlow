@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Logging Middleware with explicit Request/Response types
+// Logging Middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start: number = Date.now();
   const path: string = req.path;
@@ -21,7 +21,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Register API routes and get the server instance
+// Register API routes
 const server = registerRoutes(app);
 
 // Global Error Handler
@@ -31,22 +31,17 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-// Environment Logic
 if (process.env.NODE_ENV !== "production") {
   (async (): Promise<void> => {
     await setupVite(app, server);
-
-    // Explicitly parse port to avoid "Number" or "overload" type errors
     const PORT: number = parseInt(process.env.PORT || "5000", 10);
-
     server.listen(PORT, "0.0.0.0", () => {
       log(`Development server serving on port ${PORT}`);
     });
   })();
 } else {
-  // In Vercel production, we serve static files directly
+  // Production static serving
   serveStatic(app);
 }
 
-// CRITICAL: Export for Vercel Serverless
 export default app;
