@@ -8,7 +8,7 @@
     "build": "vite build",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "start": "NODE_ENV=production tsx server/index.ts"
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.0",
