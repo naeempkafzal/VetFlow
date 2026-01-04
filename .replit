@@ -8,11 +8,12 @@ packages = ["lsof", "openssh"]
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+build = "npm run build"
+run = "npm start"
 
 [env]
 PORT = "5000"
+NODE_ENV = "production"
 
 [workflows]
 runButton = "Project"
@@ -36,16 +37,9 @@ args = "npm run dev"
 waitForPort = 5000
 
 [[ports]]
-localPort = 3000
-externalPort = 3001
-
-[[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 5001
-externalPort = 3000
-
-[agent]
-integrations = ["github:1.0.0"]
+localPort = 5173
+externalPort = 5173

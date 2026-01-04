@@ -1,11 +1,9 @@
-// server/vite.ts
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
-// nanoid removed
 import viteConfig from "../vite.config";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,7 +18,6 @@ export function log(message: string, source = "express") {
     second: "2-digit",
     hour12: true,
   });
-
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
@@ -38,7 +35,10 @@ export async function setupVite(app: Express, server: Server) {
       ...viteLogger,
       error: (msg, options) => {
         viteLogger.error(msg, options);
-        process.exit(1);
+        // Don't kill the process on simple CSS warnings
+        if (!msg.includes("PostCSS")) {
+           process.exit(1);
+        }
       },
     },
     server: serverOptions,
@@ -50,22 +50,21 @@ export async function setupVite(app: Express, server: Server) {
     const url = req.originalUrl;
 
     try {
-      const clientTemplate = path.resolve(
-        __dirname,
-        "..",
-        "client",
-        "index.html",
-      );
+      // FIXED: Pointing to root index.html instead of client/index.html
+      const clientTemplate = path.resolve(__dirname, "..", "index.html");
 
       if (!fs.existsSync(clientTemplate)) {
         throw new Error(`Template file not found: ${clientTemplate}`);
       }
 
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
+
+      // FIXED: Match the script tag we set in the root index.html
       template = template.replace(
-        `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${Math.random().toString(36).substring(7)}"`,
+        `src="/client/src/main.tsx"`,
+        `src="/client/src/main.tsx?v=${Math.random().toString(36).substring(7)}"`
       );
+
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -76,16 +75,21 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
+  // FIXED: Vercel/Vite builds usually put static files in 'dist'
+  const distPath = path.resolve(__dirname, "..", "dist");
 
   if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
+    // Fallback check for 'public' if your vite config uses it
+    const publicPath = path.resolve(__dirname, "..", "public");
+    if (fs.existsSync(publicPath)) {
+        app.use(express.static(publicPath));
+        app.use("*", (_req, res) => res.sendFile(path.resolve(publicPath, "index.html")));
+        return;
+    }
+    throw new Error(`Build directory not found. Run 'npm run build' first.`);
   }
 
   app.use(express.static(distPath));
-
   app.use("*", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
