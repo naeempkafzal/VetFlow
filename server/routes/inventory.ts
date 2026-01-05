@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { inventory } from "@shared/schema";
 import { sql } from "drizzle-orm";
@@ -10,7 +10,7 @@ router.get("/", async (_req: Request, res: Response) => {
     const rows = await db.select().from(inventory);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 
@@ -22,7 +22,7 @@ router.get("/low-stock", async (_req: Request, res: Response) => {
       .where(sql`${inventory.currentStock} < ${inventory.minStockLevel}`);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 
@@ -31,7 +31,7 @@ router.post("/", async (req: Request, res: Response) => {
     const [newItem] = await db.insert(inventory).values(req.body).returning();
     res.json(newItem);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 

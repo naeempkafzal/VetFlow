@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { vaccinations } from "@shared/schema";
 
@@ -9,7 +9,7 @@ router.get("/", async (_req: Request, res: Response) => {
     const rows = await db.select().from(vaccinations);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 
@@ -25,7 +25,7 @@ router.post("/", async (req: Request, res: Response) => {
       .returning();
     res.json(newVaccination);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 

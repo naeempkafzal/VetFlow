@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { animals, visitRecords } from "@shared/schema";
 
@@ -13,7 +13,7 @@ router.get("/", async (req: Request, res: Response) => {
     const allAnimals = await db.select().from(animals);
     res.json(allAnimals);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 
@@ -22,7 +22,7 @@ router.post("/", async (req: Request, res: Response) => {
     const [newItem] = await db.insert(animals).values(req.body).returning();
     res.json(newItem);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 
@@ -31,7 +31,7 @@ router.post("/new-visit", async (req: Request, res: Response) => {
     const [newVisit] = await db.insert(visitRecords).values(req.body).returning();
     res.json(newVisit);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    (res as any).status(500).json({ error: (err as Error).message });
   }
 });
 
