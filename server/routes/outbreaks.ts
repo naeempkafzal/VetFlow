@@ -1,24 +1,36 @@
-import express, { Request, Response, NextFunction } from "express";
-import { db } from "../db";
-import { outbreaks } from "@shared/schema";
+import express from "express";
+import { storage } from "../storage";
+import { insertOutbreakSchema } from "@shared/schema";
 
 const router = express.Router();
 
-router.get("/", async (_req: Request, res: Response) => {
+router.get("/", async (_req: any, res: any) => {
   try {
-    const rows = await db.select().from(outbreaks);
-    res.json(rows);
+    const outbreaks = await storage.getOutbreaks();
+    res.json(outbreaks);
   } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
+    res.status(500).json({ error: (err as Error).message });
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", async (req: any, res: any) => {
   try {
-    const [newOutbreak] = await db.insert(outbreaks).values(req.body).returning();
-    res.json(newOutbreak);
+    const data = insertOutbreakSchema.parse(req.body);
+    const outbreak = await storage.createOutbreak(data);
+    res.json(outbreak);
   } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
+    res.status(400).json({ error: (err as Error).message });
+  }
+});
+
+router.patch("/:id/status", async (req: any, res: any) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { status } = req.body;
+    const outbreak = await storage.updateOutbreakStatus(id, status);
+    res.json(outbreak);
+  } catch (err) {
+    res.status(400).json({ error: (err as Error).message });
   }
 });
 

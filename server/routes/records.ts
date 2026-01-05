@@ -1,37 +1,35 @@
-import express, { Request, Response, NextFunction } from "express";
-import { db } from "../db";
-import { animals, visitRecords } from "@shared/schema";
+import express from "express";
+import { storage } from "../storage";
+import { insertAnimalSchema, insertVisitSchema } from "@shared/schema";
 
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response) => {
+// Get all animals or visit records based on path
+router.get("/", async (req: any, res: any) => {
   try {
-    if (req.baseUrl === "/api/visit-records") {
-      const allVisits = await db.select().from(visitRecords);
-      return res.json(allVisits);
+    if (req.originalUrl.includes("visit-records")) {
+      const records = await storage.getVisitRecords();
+      return res.json(records);
     }
-    const allAnimals = await db.select().from(animals);
-    res.json(allAnimals);
+    const animals = await storage.getAnimals();
+    res.json(animals);
   } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
+    res.status(500).json({ error: (err as Error).message });
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", async (req: any, res: any) => {
   try {
-    const [newItem] = await db.insert(animals).values(req.body).returning();
-    res.json(newItem);
+    if (req.originalUrl.includes("visit-records")) {
+      const data = insertVisitSchema.parse(req.body);
+      const record = await storage.createVisitRecord(data);
+      return res.json(record);
+    }
+    const data = insertAnimalSchema.parse(req.body);
+    const animal = await storage.createAnimal(data);
+    res.json(animal);
   } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
-  }
-});
-
-router.post("/new-visit", async (req: Request, res: Response) => {
-  try {
-    const [newVisit] = await db.insert(visitRecords).values(req.body).returning();
-    res.json(newVisit);
-  } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
+    res.status(400).json({ error: (err as Error).message });
   }
 });
 

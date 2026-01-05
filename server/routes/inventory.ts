@@ -1,37 +1,36 @@
-import express, { Request, Response, NextFunction } from "express";
-import { db } from "../db";
-import { inventory } from "@shared/schema";
-import { sql } from "drizzle-orm";
+import express from "express";
+import { storage } from "../storage";
+import { insertInventorySchema } from "@shared/schema";
 
 const router = express.Router();
 
-router.get("/", async (_req: Request, res: Response) => {
+router.get("/", async (_req: any, res: any) => {
   try {
-    const rows = await db.select().from(inventory);
-    res.json(rows);
+    const items = await storage.getInventory();
+    res.json(items);
   } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
+    res.status(500).json({ error: (err as Error).message });
   }
 });
 
-router.get("/low-stock", async (_req: Request, res: Response) => {
+router.post("/", async (req: any, res: any) => {
   try {
-    const rows = await db
-      .select()
-      .from(inventory)
-      .where(sql`${inventory.currentStock} < ${inventory.minStockLevel}`);
-    res.json(rows);
+    const data = insertInventorySchema.parse(req.body);
+    const item = await storage.createInventoryItem(data);
+    res.json(item);
   } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
+    res.status(400).json({ error: (err as Error).message });
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.patch("/:id/stock", async (req: any, res: any) => {
   try {
-    const [newItem] = await db.insert(inventory).values(req.body).returning();
-    res.json(newItem);
+    const id = parseInt(req.params.id);
+    const { quantity } = req.body;
+    const item = await storage.updateInventoryStock(id, quantity);
+    res.json(item);
   } catch (err) {
-    (res as any).status(500).json({ error: (err as Error).message });
+    res.status(400).json({ error: (err as Error).message });
   }
 });
 
