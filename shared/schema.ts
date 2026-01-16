@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, numeric, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -23,15 +23,20 @@ export const visitRecords = pgTable("visit_records", {
   notes: text("notes"),
 });
 
-// Inventory Table - Column names aligned with routes
+// Inventory Table (Updated with Stock Logic Fields)
 export const inventory = pgTable("inventory", {
   id: serial("id").primaryKey(),
   itemName: text("item_name").notNull(),
-  category: text("category").notNull(),
+  category: text("category"),
   currentStock: integer("current_stock").notNull().default(0), 
   unit: text("unit").notNull(),
   minStockLevel: integer("min_stock_level").notNull().default(5),
   lastUpdated: timestamp("last_updated").defaultNow(),
+  // Keeping existing fields for compatibility
+  cost: numeric("cost", { precision: 10, scale: 2 }).notNull(),
+  quantity: integer("quantity").notNull().default(0), 
+  lowStockThreshold: integer("low_stock_threshold").notNull().default(10),
+  initialStock: integer("initial_stock").default(0) // For AI Forecasting
 });
 
 // Vaccinations Table
@@ -54,7 +59,7 @@ export const outbreaks = pgTable("outbreaks", {
   affectedCount: integer("affected_count").default(0),
 });
 
-// Appointments Table - Column names aligned with routes
+// Appointments Table
 export const appointments = pgTable("appointments", {
   id: serial("id").primaryKey(),
   animalId: integer("animal_id"),
@@ -62,6 +67,26 @@ export const appointments = pgTable("appointments", {
   appointmentDate: timestamp("appointment_date").notNull(),
   reason: text("reason").notNull(),
   status: text("status").notNull().default("scheduled"),
+});
+
+// NEW: Billings Table
+export const billings = pgTable("billings", {
+  id: serial("id").primaryKey(),
+  visitId: integer("visit_id").notNull().references(() => visitRecords.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("draft"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// NEW: Notifications Table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(), // 'vaccine', 'appointment', 'stock'
+  title: text("title").notNull(),
+  message: text("message"),
+  targetDate: timestamp("target_date").notNull(),
+  isRead: boolean("is_read").default(false),
 });
 
 // Schemas
@@ -72,6 +97,10 @@ export const insertVaccinationSchema = createInsertSchema(vaccinations).omit({ i
 export const insertOutbreakSchema = createInsertSchema(outbreaks).omit({ id: true });
 export const insertAppointmentSchema = createInsertSchema(appointments).omit({ id: true });
 
+// NEW Schemas for Automation
+export const insertBillingsSchema = createInsertSchema(billings).omit({ id: true });
+export const insertNotificationsSchema = createInsertSchema(notifications);
+
 // Types
 export type Animal = typeof animals.$inferSelect;
 export type VisitRecord = typeof visitRecords.$inferSelect;
@@ -79,3 +108,5 @@ export type InventoryItem = typeof inventory.$inferSelect;
 export type Vaccination = typeof vaccinations.$inferSelect;
 export type Outbreak = typeof outbreaks.$inferSelect;
 export type Appointment = typeof appointments.$inferSelect;
+export type Billing = typeof billings.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
