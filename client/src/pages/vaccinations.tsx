@@ -3,9 +3,10 @@ import { useState, useEffect, FormEvent } from "react";
 interface Vaccination {
   id?: number;
   animalId?: number;
-  vaccineType?: string;
-  dueDate?: string;
-  status?: string;
+  vaccineName?: string;      // Changed from vaccineType
+  dateAdministered?: string;  // Changed from dueDate
+  nextDueDate?: string;      // Added to match DB schema
+  administeredBy?: string;    // Added to match DB schema
 }
 
 const Vaccinations = ({ language }: { language: string }) => {
@@ -13,9 +14,10 @@ const Vaccinations = ({ language }: { language: string }) => {
   const [vaccinations, setVaccinations] = useState<Vaccination[]>([]);
   const [form, setForm] = useState({
     animalId: 0,
-    vaccineType: "",
-    dueDate: "",
-    status: "",
+    vaccineName: "",         // Changed
+    dateAdministered: "",    // Changed
+    nextDueDate: "",         // Added
+    administeredBy: "",      // Added
   });
 
   useEffect(() => {
@@ -52,11 +54,53 @@ const Vaccinations = ({ language }: { language: string }) => {
         onSubmit={handleSubmit}
         style={{ padding: "24px", backgroundColor: "#1e293b", borderRadius: "8px", maxWidth: "500px", marginBottom: "32px" }}
       >
-        <input type="number" value={form.animalId} onChange={(e) => setForm({ ...form, animalId: parseInt(e.target.value) || 0 })} placeholder={t("Animal ID", "جانور کا ID")} required style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} />
-        <input type="text" value={form.vaccineType} onChange={(e) => setForm({ ...form, vaccineType: e.target.value })} placeholder={t("Vaccine Type", "ویکسین کی قسم")} required style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} />
-        <input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} required style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} />
-        <input type="text" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} placeholder={t("Status", "حالت")} style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} />
-        <button type="submit" style={{ width: "100%", padding: "10px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: "600", cursor: "pointer" }}>
+        <input 
+          type="number" 
+          value={form.animalId} 
+          onChange={(e) => setForm({ ...form, animalId: parseInt(e.target.value) || 0 })} 
+          placeholder={t("Animal ID", "جانور کا ID")} 
+          required 
+          style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} 
+        />
+        
+        <input 
+          type="text" 
+          value={form.vaccineName} 
+          onChange={(e) => setForm({ ...form, vaccineName: e.target.value })} 
+          placeholder={t("Vaccine Name", "ویکسین کا نام")} 
+          required 
+          style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} 
+        />
+        
+        <input 
+          type="date" 
+          value={form.dateAdministered} 
+          onChange={(e) => setForm({ ...form, dateAdministered: e.target.value })} 
+          required 
+          style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} 
+          title={t("Date Administered", "دیا گیا تاریخ")}
+        />
+        
+        <input 
+          type="date" 
+          value={form.nextDueDate} 
+          onChange={(e) => setForm({ ...form, nextDueDate: e.target.value })} 
+          style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} 
+          title={t("Next Due Date", "اگلا موعد")}
+        />
+
+        <input 
+          type="text" 
+          value={form.administeredBy} 
+          onChange={(e) => setForm({ ...form, administeredBy: e.target.value })} 
+          placeholder={t("Administered By", "کے ذریعے دیا گیا")} 
+          style={{ width: "100%", padding: "8px", marginBottom: "16px", border: "1px solid #334155", borderRadius: "6px", backgroundColor: "#0f172a", color: "#f1f5f9" }} 
+        />
+
+        <button 
+          type="submit" 
+          style={{ width: "100%", padding: "10px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: "600", cursor: "pointer" }}
+        >
           {t("Add Vaccination", "ویکسینیشن شامل کریں")}
         </button>
       </form>
@@ -66,8 +110,9 @@ const Vaccinations = ({ language }: { language: string }) => {
         ) : (
           vaccinations.map((vax) => (
             <div key={vax.id} style={{ padding: "16px", border: "1px solid #334155", borderRadius: "8px", marginBottom: "12px", backgroundColor: "#1e293b" }}>
-              <p style={{ margin: 0, color: "#f1f5f9", fontWeight: "600" }}>Animal {vax.animalId} - {vax.vaccineType}</p>
-              <p style={{ margin: "4px 0 0 0", color: "#cbd5e1", fontSize: "14px" }}>{t("Due:", "موعد :")} {vax.dueDate || "N/A"}</p>
+              <p style={{ margin: 0, color: "#f1f5f9", fontWeight: "600" }}>Animal {vax.animalId} - {vax.vaccineName}</p>
+              <p style={{ margin: "4px 0 0 0", color: "#cbd5e1", fontSize: "14px" }}>{t("Date:", "تاریخ :")} {vax.dateAdministered || "N/A"}</p>
+              {vax.nextDueDate && <p style={{ margin: "2px 0 0 0", color: "#94a3b8", fontSize: "12px" }}>{t("Next:", "اگلا :")} {vax.nextDueDate}</p>}
             </div>
           ))
         )}

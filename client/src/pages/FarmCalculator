@@ -1,57 +1,99 @@
 import React, { useState } from "react";
 
-const FarmCalculator: React.FC = () => {
+const FarmCalculator: React.FC<{ language: string }> = ({ language }) => {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [daysIll, setDaysIll] = useState(0);
   const [milkYield, setMilkYield] = useState(0);
   const [loss, setLoss] = useState<number | null>(null);
-  const [lang, setLang] = useState<"en" | "ur">("en");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const dailyLoss = milkYield * 0.5; // Assume 50% loss per day during illness
+    const dailyLoss = milkYield * 0.5;
     setLoss(daysIll * dailyLoss);
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <button onClick={() => setLang(lang === "en" ? "ur" : "en")} className="mb-4 p-2 bg-secondary text-secondary-foreground rounded">
-        Switch Language (تبدیل زبان)
-      </button>
-      <h1 className="text-3xl font-bold text-foreground mb-6 urdu-text">
-        {lang === "en" ? "Farm Productivity Calculator" : "فارم کی پیداوار کا حساب کتاب"}
+    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: "bold", marginBottom: "8px", color: "#f1f5f9" }}>
+        {t("Farm Productivity Calculator", "فارم کی پیداوار کا حساب کتاب")}
       </h1>
-      <form onSubmit={handleSubmit} className="glass-card p-6 rounded-lg shadow-md max-w-md">
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
-            {lang === "en" ? "Days Ill:" : "بیماری کے دن:"}
-          </label>
-          <input
-            type="number"
-            value={daysIll}
-            onChange={(e) => setDaysIll(parseInt(e.target.value) || 0)}
-            required
-            className="mt-1 p-2 w-full border border-border rounded"
-          />
+      <div
+        style={{
+          padding: "24px",
+          backgroundColor: "#1e293b",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)",
+          maxWidth: "448px",
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+              {t("Days Ill:", "بیماری کے دن:")}
+            </label>
+            <input
+              type="number"
+              value={daysIll}
+              onChange={(e) => setDaysIll(parseInt(e.target.value) || 0)}
+              required
+              style={{
+                marginTop: "4px",
+                padding: "8px",
+                width: "100%",
+                border: "1px solid #334155",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#0f172a",
+                color: "#f1f5f9"
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+              {t("Daily Milk Yield (Liters):", "روزانہ دودھ کی پیداوار (لیٹر):")}
+            </label>
+            <input
+              type="number"
+              value={milkYield}
+              onChange={(e) => setMilkYield(parseInt(e.target.value) || 0)}
+              required
+              style={{
+                marginTop: "4px",
+                padding: "8px",
+                width: "100%",
+                border: "1px solid #334155",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#0f172a",
+                color: "#f1f5f9"
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "8px 16px",
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              borderRadius: "4px",
+              border: "none",
+              fontSize: "14px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            {t("Calculate Loss", "نقصان کا حساب لگائیں")}
+          </button>
+        </form>
+      </div>
+      {loss !== null && (
+        <div style={{ marginTop: "24px", padding: "16px", backgroundColor: "#1e293b", borderRadius: "8px", color: "#f1f5f9" }}>
+          <p style={{ fontSize: "16px" }}>
+            {t(`Estimated Milk Yield Loss: ${loss} Liters`, `تخمینی دودھ کی پیداوار کا نقصان: ${loss} لیٹر`)}
+          </p>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
-            {lang === "en" ? "Daily Milk Yield (Liters):" : "روزانہ دودھ کی پیداوار (لیٹر):"}
-          </label>
-          <input
-            type="number"
-            value={milkYield}
-            onChange={(e) => setMilkYield(parseInt(e.target.value) || 0)}
-            required
-            className="mt-1 p-2 w-full border border-border rounded"
-          />
-        </div>
-        <button type="submit" className="w-full py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90">
-          {lang === "en" ? "Calculate Loss" : "نقصان کا حساب لگائیں"}
-        </button>
-      </form>
-      {loss !== null && <p className="mt-4 text-sm text-foreground">
-        {lang === "en" ? `Estimated Milk Yield Loss: ${loss} Liters` : `تخمینی دودھ کی پیداوار کا نقصان: ${loss} لیٹر`}
-      </p>}
+      )}
     </div>
   );
 };

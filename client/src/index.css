@@ -2,65 +2,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
 
-@theme {
-  --color-background: hsl(222.2 84% 4.9%);
-  --color-foreground: hsl(210 40% 98%);
-  --color-card: hsl(222.2 84% 4.9%);
-  --color-card-foreground: hsl(210 40% 98%);
-  --color-popover: hsl(222.2 84% 4.9%);
-  --color-popover-foreground: hsl(210 40% 98%);
-  --color-primary: hsl(210 40% 98%);
-  --color-primary-foreground: hsl(222.2 47.4% 11.2%);
-  --color-secondary: hsl(217.2 32.6% 17.5%);
-  --color-secondary-foreground: hsl(210 40% 98%);
-  --color-muted: hsl(217.2 32.6% 17.5%);
-  --color-muted-foreground: hsl(215 20.2% 65.1%);
-  --color-accent: hsl(217.2 32.6% 17.5%);
-  --color-accent-foreground: hsl(210 40% 98%);
-  --color-destructive: hsl(0 62.8% 30.6%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-border: hsl(217.2 32.6% 17.5%);
-  --color-input: hsl(217.2 32.6% 17.5%);
-  --color-ring: hsl(212.7 26.8% 83.9%);
+:root {
+  --background: 15 23 42;
+  --foreground: 241 245 249;
+  --card: 30 41 59;
+  --card-foreground: 241 245 249;
+  --popover: 30 41 59;
+  --popover-foreground: 241 245 249;
+  --primary: 37 99 235;
+  --primary-foreground: 248 250 252;
+  --secondary: 30 58 138;
+  --secondary-foreground: 226 232 240;
+  --muted: 30 58 138;
+  --muted-foreground: 215 204 200;
+  --accent: 30 58 138;
+  --accent-foreground: 226 232 240;
+  --destructive: 0 62.8 30.6;
+  --destructive-foreground: 210 40 98;
+  --border: 51 65 85;
+  --input: 51 65 85;
+  --ring: 215 180.2 83.9;
+  --radius: 0.5rem;
 }
 
-@layer base {
-  body {
-    background-color: #0f172a;
-    color: #f1f5f9;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-
-  [direction="rtl"], .font-urdu {
-    font-family: 'Noto Nastaliq Urdu', serif;
-    line-height: 2.2;
-  }
-
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: #020617;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: #1e293b;
-    border-radius: 9999px;
-    border: 2px solid #020617;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: #334155;
-  }
+body {
+  @apply bg-background text-foreground;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  font-family: 'Inter', sans-serif;
 }
 
-@utility glass-card {
-  background-color: color-mix(in srgb, var(--color-slate-900) 50%, transparent);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--color-slate-800);
+.font-urdu {
+  font-family: 'Noto Nastaliq Urdu', serif;
 }

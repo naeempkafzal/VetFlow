@@ -6,6 +6,10 @@ import Appointments from "./pages/appointments";
 import Outbreaks from "./pages/outbreaks";
 import Analytics from "./pages/analytics";
 import NotFound from "./pages/not-found";
+import AMRAssessment from "./pages/amrassessment";
+import FarmCalculator from "./pages/farmcalculator"; // Changed to lowercase
+import PetWelfare from "./pages/petwelfare";
+import SymptomChecker from "./pages/symptom-checker";
 
 const pages = [
   { name: "Dashboard", path: "/", nameUr: "ڈیش بورڈ" },
@@ -14,6 +18,10 @@ const pages = [
   { name: "Appointments", path: "/appointments", nameUr: "اپائنٹمنٹس" },
   { name: "Outbreaks", path: "/outbreaks", nameUr: "پھیلاؤ" },
   { name: "Analytics", path: "/analytics", nameUr: "تجزیہ" },
+  { name: "AMR Assessment", path: "/amr", nameUr: "AMR تشخیص" },
+  { name: "Farm Calculator", path: "/calculator", nameUr: "فارم کیلکولیٹر" },
+  { name: "Pet Welfare", path: "/welfare", nameUr: "پالتو فلاح و بہبود" },
+  { name: "Symptom Checker", path: "/symptoms", nameUr: "علامات چیکر" },
 ];
 
 const App = () => {
@@ -40,7 +48,7 @@ const App = () => {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: "4px" }}>
+          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
             {pages.map((p) => (
               <button
                 key={p.path}
@@ -76,7 +84,10 @@ const App = () => {
         {currentPage === "/appointments" && <Appointments language={language} />}
         {currentPage === "/outbreaks" && <Outbreaks language={language} />}
         {currentPage === "/analytics" && <Analytics language={language} />}
-        {/* Simple check for undefined paths */}
+        {currentPage === "/amr" && <AMRAssessment language={language} />}
+        {currentPage === "/calculator" && <FarmCalculator language={language} />}
+        {currentPage === "/welfare" && <PetWelfare language={language} />}
+        {currentPage === "/symptoms" && <SymptomChecker language={language} />}
         {!pages.find(p => p.path === currentPage) && <NotFound language={language} />}
       </main>
     </div>

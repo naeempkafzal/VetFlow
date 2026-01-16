@@ -1,77 +1,99 @@
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 
-const PetWelfare = () => {
+const PetWelfare = ({ language = "en" }: { language?: string }) => {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [healthData, setHealthData] = useState("");
   const [visitPatterns, setVisitPatterns] = useState("");
   const [score, setScore] = useState<number | null>(null);
-  const [lang, setLang] = useState<"en" | "ur">("en");
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple scoring logic: Higher visits = lower score
     const visitCount = parseInt(visitPatterns) || 0;
-    const healthScore = healthData.toLowerCase() === "good" ? 80 : 40; // Case-insensitive
+    const healthScore = healthData.toLowerCase() === "good" ? 80 : 40;
     setScore(healthScore - visitCount * 5);
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <button
-        onClick={() => setLang(lang === "en" ? "ur" : "en")}
-        className="mb-4 p-2 bg-blue-500 text-white rounded"
-      >
-        Switch Language (تبدیل زبان)
-      </button>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        {lang === "en"
-          ? "Pet Welfare Scoring"
-          : "پالتو جانور کی فلاح و بہبود کا سکورنگ"}
+    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: "bold", marginBottom: "8px", color: "#f1f5f9" }}>
+        {t("Pet Welfare Scoring", "پالتو جانور کی فلاح و بہبود کا سکورنگ")}
       </h1>
-      <form
-        onSubmit={handleSubmit}
-        className="p-6 rounded-lg shadow-md max-w-md bg-white"
+      <div
+        style={{
+          padding: "24px",
+          backgroundColor: "#1e293b",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)",
+          maxWidth: "448px",
+        }}
       >
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en"
-              ? "Health Data (good/poor):"
-              : "صحت کا ڈیٹا (اچھا/غریب):"}
-          </label>
-          <input
-            type="text"
-            value={healthData}
-            onChange={(e) => setHealthData(e.target.value)}
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en"
-              ? "Visit Patterns (number):"
-              : "وزٹ کے پیٹرن (نمبر):"}
-          </label>
-          <input
-            type="number"
-            value={visitPatterns}
-            onChange={(e) => setVisitPatterns(e.target.value)}
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          {lang === "en" ? "Calculate Score" : "سکور کا حساب لگائیں"}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+              {t("Health Data (good/poor):", "صحت کا ڈیٹا (اچھا/غریب):")}
+            </label>
+            <input
+              type="text"
+              value={healthData}
+              onChange={(e) => setHealthData(e.target.value)}
+              required
+              style={{
+                marginTop: "4px",
+                padding: "8px",
+                width: "100%",
+                border: "1px solid #334155",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#0f172a",
+                color: "#f1f5f9"
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+              {t("Visit Patterns (number):", "وزٹ کے پیٹرن (نمبر):")}
+            </label>
+            <input
+              type="number"
+              value={visitPatterns}
+              onChange={(e) => setVisitPatterns(e.target.value)}
+              required
+              style={{
+                marginTop: "4px",
+                padding: "8px",
+                width: "100%",
+                border: "1px solid #334155",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#0f172a",
+                color: "#f1f5f9"
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "8px 16px",
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              borderRadius: "4px",
+              border: "none",
+              fontSize: "14px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            {t("Calculate Score", "سکور کا حساب لگائیں")}
+          </button>
+        </form>
+      </div>
       {score !== null && (
-        <p className="mt-4 text-sm text-gray-800">
-          {lang === "en"
-            ? `Pet Welfare Score: ${score}`
-            : `پالتو جانور کی فلاح و بہبود کا سکور: ${score}`}
-        </p>
+        <div style={{ marginTop: "24px", padding: "16px", backgroundColor: "#1e293b", borderRadius: "8px", color: "#f1f5f9" }}>
+          <p style={{ fontSize: "16px" }}>
+            {t(`Pet Welfare Score: ${score}`, `پالتو جانور کی فلاح و بہبود کا سکور: ${score}`)}
+          </p>
+        </div>
       )}
     </div>
   );

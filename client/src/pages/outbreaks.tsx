@@ -6,6 +6,7 @@ interface Outbreak {
   geoCoordinates?: string;
   province?: string;
   advisory?: string;
+  status?: string;
 }
 
 const Outbreaks = ({ language }: { language: string }) => {
@@ -31,10 +32,16 @@ const Outbreaks = ({ language }: { language: string }) => {
       return;
     }
 
+    // FIX: Added status field required by Backend Schema
+    const payload = {
+      ...form,
+      status: "active"
+    };
+
     fetch("/api/outbreaks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     })
       .then(() => {
         setForm({ disease: "", geoCoordinates: "", province: "", advisory: "" });

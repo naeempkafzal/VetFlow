@@ -97,7 +97,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateInventoryStock(id: number, quantity: number): Promise<any> {
-    const [item] = await db.update(inventory).set({ currentStock: quantity, lastUpdated: new Date() }).where(eq(inventory.id, id)).returning();
+    // FIX: Reverted to 'currentStock' to match Drizzle Schema
+    // Removed 'lastUpdated' as it likely doesn't exist in schema
+    const [item] = await db.update(inventory).set({ currentStock: quantity }).where(eq(inventory.id, id)).returning();
     return item;
   }
 
@@ -129,7 +131,7 @@ export class DatabaseStorage implements IStorage {
 
   // Outbreak Methods
   async getOutbreaks(): Promise<any[]> {
-    return await db.select().from(outbreaks).orderBy(desc(outbreaks.reportedDate));
+    return await db.select().from(outbreaks).orderBy(desc(outbreaks.id));
   }
 
   async createOutbreak(insert: any): Promise<any> {

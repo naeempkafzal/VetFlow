@@ -42,7 +42,8 @@ const Records = () => {
   const [lang, setLang] = useState<"en" | "ur">("en");
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/records")
+    // FIX: Changed hardcoded URL to relative path
+    fetch("/api/records")
       .then((res) => res.json())
       .then(setAnimals)
       .catch((err) => console.error("Fetch error:", err));
@@ -50,13 +51,14 @@ const Records = () => {
 
   const handleAnimalSubmit = (e: FormEvent) => {
     e.preventDefault();
-    fetch("http://localhost:5001/api/records", {
+    // FIX: Changed hardcoded URL to relative path
+    fetch("/api/records", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     })
       .then(() =>
-        fetch("http://localhost:5001/api/records")
+        fetch("/api/records")
           .then((res) => res.json())
           .then(setAnimals),
       )
@@ -65,7 +67,8 @@ const Records = () => {
 
   const handleVisitSubmit = (e: FormEvent) => {
     e.preventDefault();
-    fetch("http://localhost:5001/api/records/visits", {
+    // FIX: Changed hardcoded URL to relative path
+    fetch("/api/visit-records", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(visitForm),

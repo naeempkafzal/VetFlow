@@ -2,20 +2,19 @@ import { useState, useEffect, ChangeEvent } from "react";
 
 interface Appointment {
   id?: number;
-  date: string;
-  time: string;
-  vet: string;
-  notes: string;
+  ownerName?: string;
+  reason?: string;
+  appointmentDate?: string;
+  status?: string;
 }
 
 const Appointments = ({ language }: { language: string }) => {
   const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [newAppointment, setNewAppointment] = useState({
-    date: "",
-    time: "",
-    vet: "",
-    notes: "",
+    ownerName: "",    // Aligned with Backend
+    reason: "",       // Aligned with Backend
+    appointmentDate: "", // Aligned with Backend (Combined Date/Time)
   });
 
   useEffect(() => {
@@ -38,8 +37,8 @@ const Appointments = ({ language }: { language: string }) => {
   };
 
   const handleSubmit = () => {
-    if (!newAppointment.date || !newAppointment.time || !newAppointment.vet) {
-      alert(t("Please fill all required fields", "براہ کرم تمام ضروری فیلڈز بھریں"));
+    if (!newAppointment.appointmentDate) {
+      alert(t("Please select a date", "براہ کرم تاریخ منتخب کریں"));
       return;
     }
 
@@ -51,7 +50,7 @@ const Appointments = ({ language }: { language: string }) => {
       .then((response) => response.json())
       .then((data) => {
         setAppointments([...appointments, data]);
-        setNewAppointment({ date: "", time: "", vet: "", notes: "" });
+        setNewAppointment({ ownerName: "", reason: "", appointmentDate: "" });
       })
       .catch((error) => console.error("Error adding appointment:", error));
   };
@@ -78,56 +77,13 @@ const Appointments = ({ language }: { language: string }) => {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px", marginBottom: "16px" }}>
           <div>
             <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
-              {t("Date:", "تاریخ:")}
-            </label>
-            <input
-              type="date"
-              name="date"
-              value={newAppointment.date}
-              onChange={handleInputChange}
-              style={{
-                width: "100%",
-                border: "1px solid #334155",
-                padding: "8px",
-                borderRadius: "4px",
-                fontSize: "14px",
-                backgroundColor: "#0f172a",
-                color: "#f1f5f9"
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
-              {t("Time:", "وقت:")}
-            </label>
-            <input
-              type="time"
-              name="time"
-              value={newAppointment.time}
-              onChange={handleInputChange}
-              style={{
-                width: "100%",
-                border: "1px solid #334155",
-                padding: "8px",
-                borderRadius: "4px",
-                fontSize: "14px",
-                backgroundColor: "#0f172a",
-                color: "#f1f5f9"
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
-              {t("Vet Name:", "ڈاکٹر کا نام:")}
+              {t("Owner/Staff Name:", "مالک/اسٹاف کا نام:")}
             </label>
             <input
               type="text"
-              name="vet"
-              value={newAppointment.vet}
+              name="ownerName"
+              value={newAppointment.ownerName}
               onChange={handleInputChange}
-              placeholder={t("Enter vet name", "ڈاکٹر کا نام درج کریں")}
               style={{
                 width: "100%",
                 border: "1px solid #334155",
@@ -142,14 +98,34 @@ const Appointments = ({ language }: { language: string }) => {
 
           <div>
             <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
-              {t("Notes:", "نوٹس:")}
+              {t("Reason:", "وجہ:")}
             </label>
             <input
               type="text"
-              name="notes"
-              value={newAppointment.notes}
+              name="reason"
+              value={newAppointment.reason}
               onChange={handleInputChange}
-              placeholder={t("Additional notes", "اضافی نوٹس")}
+              style={{
+                width: "100%",
+                border: "1px solid #334155",
+                padding: "8px",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#0f172a",
+                color: "#f1f5f9"
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+              {t("Date & Time:", "تاریخ اور وقت:")}
+            </label>
+            <input
+              type="datetime-local"
+              name="appointmentDate"
+              value={newAppointment.appointmentDate}
+              onChange={handleInputChange}
               style={{
                 width: "100%",
                 border: "1px solid #334155",
@@ -174,10 +150,7 @@ const Appointments = ({ language }: { language: string }) => {
             fontSize: "14px",
             fontWeight: "500",
             cursor: "pointer",
-            transition: "background-color 0.2s",
           }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1d4ed8")}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
         >
           {t("Add Appointment", "ملاقات شامل کریں")}
         </button>
@@ -201,13 +174,13 @@ const Appointments = ({ language }: { language: string }) => {
                     {t("Date", "تاریخ")}
                   </th>
                   <th style={{ border: "1px solid #334155", padding: "12px", textAlign: "left", fontSize: "14px", fontWeight: "600", color: "#f1f5f9" }}>
-                    {t("Time", "وقت")}
+                    {t("Owner/Staff", "مالک/اسٹاف")}
                   </th>
                   <th style={{ border: "1px solid #334155", padding: "12px", textAlign: "left", fontSize: "14px", fontWeight: "600", color: "#f1f5f9" }}>
-                    {t("Vet", "ڈاکٹر")}
+                    {t("Reason", "وجہ")}
                   </th>
                   <th style={{ border: "1px solid #334155", padding: "12px", textAlign: "left", fontSize: "14px", fontWeight: "600", color: "#f1f5f9" }}>
-                    {t("Notes", "نوٹس")}
+                    {t("Status", "حالت")}
                   </th>
                 </tr>
               </thead>
@@ -215,16 +188,16 @@ const Appointments = ({ language }: { language: string }) => {
                 {appointments.map((apt, i) => (
                   <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#1e293b" : "#0f172a" }}>
                     <td style={{ border: "1px solid #334155", padding: "12px", fontSize: "14px", color: "#f1f5f9" }}>
-                      {apt.date}
-                    </td>
-                    <td style={{ border: "1px solid #334155", padding: "12px", fontSize: "14px", color: "#f1f5f9" }}>
-                      {apt.time}
+                      {apt.appointmentDate?.replace('T', ' ')}
                     </td>
                     <td style={{ border: "1px solid #334155", padding: "12px", fontSize: "14px", color: "#f1f5f9", fontWeight: "500" }}>
-                      {apt.vet}
+                      {apt.ownerName}
                     </td>
                     <td style={{ border: "1px solid #334155", padding: "12px", fontSize: "14px", color: "#cbd5e1" }}>
-                      {apt.notes || t("No notes", "کوئی نوٹ نہیں")}
+                      {apt.reason || t("N/A", "N/A")}
+                    </td>
+                    <td style={{ border: "1px solid #334155", padding: "12px", fontSize: "14px", color: "#cbd5e1" }}>
+                      {apt.status || "scheduled"}
                     </td>
                   </tr>
                 ))}

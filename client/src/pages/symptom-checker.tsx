@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 
 const diseases = [
   {
@@ -21,13 +21,13 @@ const diseases = [
   },
 ];
 
-const SymptomChecker = () => {
+const SymptomChecker = ({ language = "en" }: { language?: string }) => {
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [symptoms, setSymptoms] = useState("");
   const [species, setSpecies] = useState("");
-  const [results, setResults] = useState<any[]>([]); // Fixed syntax
-  const [lang, setLang] = useState<"en" | "ur">("en"); // Fixed syntax
+  const [results, setResults] = useState<any[]>([]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const filtered = diseases.filter(
       (d) =>
@@ -40,67 +40,91 @@ const SymptomChecker = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <button
-        onClick={() => setLang(lang === "en" ? "ur" : "en")}
-        className="mb-4 p-2 bg-blue-500 text-white rounded"
-      >
-        Switch Language (تبدیل زبان)
-      </button>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        {lang === "en" ? "Symptom Checker" : "علامات چیکر"}
+    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: "bold", marginBottom: "8px", color: "#f1f5f9" }}>
+        {t("Symptom Checker", "علامات چیکر")}
       </h1>
-      <form
-        onSubmit={handleSubmit}
-        className="p-6 rounded-lg shadow-md max-w-md bg-white"
+      <div
+        style={{
+          padding: "24px",
+          backgroundColor: "#1e293b",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)",
+          maxWidth: "448px",
+        }}
       >
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en"
-              ? "Species (Livestock or Pets):"
-              : "نوع (مویشی یا پالتو جانور):"}
-          </label>
-          <input
-            type="text"
-            value={species}
-            onChange={(e) => setSpecies(e.target.value)}
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">
-            {lang === "en"
-              ? "Symptoms (comma-separated):"
-              : "علامات (کاما سے الگ):"}
-          </label>
-          <input
-            type="text"
-            value={symptoms}
-            onChange={(e) => setSymptoms(e.target.value)}
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          {lang === "en" ? "Check" : "چیکنگ کریں"}
-        </button>
-      </form>
-      <ul className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+              {t("Species (Livestock or Pets):", "نوع (مویشی یا پالتو جانور):")}
+            </label>
+            <input
+              type="text"
+              value={species}
+              onChange={(e) => setSpecies(e.target.value)}
+              required
+              style={{
+                marginTop: "4px",
+                padding: "8px",
+                width: "100%",
+                border: "1px solid #334155",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#0f172a",
+                color: "#f1f5f9"
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+              {t("Symptoms (comma-separated):", "علامات (کاما سے الگ):")}
+            </label>
+            <input
+              type="text"
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              required
+              style={{
+                marginTop: "4px",
+                padding: "8px",
+                width: "100%",
+                border: "1px solid #334155",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#0f172a",
+                color: "#f1f5f9"
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "8px 16px",
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              borderRadius: "4px",
+              border: "none",
+              fontSize: "14px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            {t("Check", "چیکنگ کریں")}
+          </button>
+        </form>
+      </div>
+
+      <ul style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px", listStyle: "none", padding: 0 }}>
         {results.length === 0 ? (
-          <li className="text-gray-600">
-            {lang === "en"
-              ? "No matching diseases."
-              : "کوئی ملتی جلتی بیماری نہیں."}
+          <li style={{ color: "#cbd5e1", padding: "16px", backgroundColor: "#1e293b", borderRadius: "8px" }}>
+            {t("No matching diseases.", "کوئی ملتی جلتی بیماری نہیں.")}
           </li>
         ) : (
           results.map((d) => (
-            <li key={d.name} className="p-4 rounded-lg shadow-md bg-white">
-              <span className="text-gray-800">
-                {lang === "en" ? d.name : d.urdu}
+            <li key={d.name} style={{ padding: "16px", backgroundColor: "#1e293b", borderRadius: "8px", color: "#f1f5f9", border: "1px solid #334155" }}>
+              <span style={{ fontSize: "16px", fontWeight: "600" }}>
+                {language === "en" ? d.name : d.urdu}
               </span>
             </li>
           ))

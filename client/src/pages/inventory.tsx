@@ -19,7 +19,7 @@ const Inventory = ({ language }: { language: string }) => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/inventory")
+    fetch("/api/inventory")
       .then((res) => res.json())
       .then(setInventory)
       .catch((err) => console.error("Fetch error:", err));
@@ -31,14 +31,22 @@ const Inventory = ({ language }: { language: string }) => {
       return;
     }
     
-    fetch("http://localhost:5001/api/inventory", {
+    // FIX: Convert strings to numbers
+    const payload = {
+      itemName: form.itemName,
+      quantity: parseInt(form.quantity.toString()),
+      cost: parseFloat(form.cost.toString()),
+      lowStockThreshold: parseInt(form.lowStockThreshold.toString()),
+    };
+    
+    fetch("/api/inventory", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     })
       .then(() => {
         setForm({ itemName: "", quantity: 0, cost: 0, lowStockThreshold: 10 });
-        return fetch("http://localhost:5001/api/inventory");
+        return fetch("/api/inventory");
       })
       .then((res) => res.json())
       .then(setInventory)
