@@ -28,7 +28,7 @@ const FarmCalculator: React.FC<{ language: string }> = ({ language }) => {
       >
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
               {t("Days Ill:", "بیماری کے دن:")}
             </label>
             <input
@@ -49,7 +49,7 @@ const FarmCalculator: React.FC<{ language: string }> = ({ language }) => {
             />
           </div>
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1", marginBottom: "4px" }}>
+            <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#cbd5e1" }}>
               {t("Daily Milk Yield (Liters):", "روزانہ دودھ کی پیداوار (لیٹر):")}
             </label>
             <input

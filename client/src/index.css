@@ -3,34 +3,79 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
 
 :root {
-  --background: 15 23 42;
+  --background: 15 23 42; /* Matches #0f172a */
   --foreground: 241 245 249;
-  --card: 30 41 59;
+  
+  --card: 30 41 59; /* Matches #1e293b */
   --card-foreground: 241 245 249;
+  
   --popover: 30 41 59;
   --popover-foreground: 241 245 249;
-  --primary: 37 99 235;
+  
+  --primary: 37 99 235; /* Matches #2563eb */
   --primary-foreground: 248 250 252;
+  
   --secondary: 30 58 138;
   --secondary-foreground: 226 232 240;
+  
   --muted: 30 58 138;
   --muted-foreground: 215 204 200;
+  
   --accent: 30 58 138;
   --accent-foreground: 226 232 240;
+  
   --destructive: 0 62.8 30.6;
   --destructive-foreground: 210 40 98;
+  
   --border: 51 65 85;
   --input: 51 65 85;
   --ring: 215 180.2 83.9;
+  
   --radius: 0.5rem;
 }
 
-body {
-  @apply bg-background text-foreground;
-  font-feature-settings: "rlig" 1, "calt" 1;
-  font-family: 'Inter', sans-serif;
-}
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 
-.font-urdu {
-  font-family: 'Noto Nastaliq Urdu', serif;
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Semantic Utility Classes (Required for shadcn/ui components) */
+  .bg-background { background-color: var(--background); }
+  .text-foreground { color: var(--foreground); }
+  
+  .bg-card { background-color: var(--card); }
+  .text-card-foreground { color: var(--card-foreground); }
+  
+  .bg-popover { background-color: var(--popover); }
+  .text-popover-foreground { color: var(--popover-foreground); }
+  
+  .bg-primary { background-color: var(--primary); }
+  .text-primary-foreground { color: var(--primary-foreground); }
+  
+  .bg-secondary { background-color: var(--secondary); }
+  .text-secondary-foreground { color: var(--secondary-foreground); }
+  
+  .bg-muted { background-color: var(--muted); }
+  .text-muted-foreground { color: var(--muted-foreground); }
+  
+  .bg-accent { background-color: var(--accent); }
+  .text-accent-foreground { color: var(--accent-foreground); }
+  
+  .bg-destructive { background-color: var(--destructive); }
+  .text-destructive-foreground { color: var(--destructive-foreground); }
+  
+  .border-input { border-color: var(--input); }
+  .border-border { border-color: var(--border); }
+  .ring-ring { box-shadow: 0 0 0 2px var(--ring); }
+
+  .font-urdu {
+    font-family: 'Noto Nastaliq Urdu', serif;
+  }
 }

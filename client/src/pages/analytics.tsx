@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -14,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTranslation } from "@/lib/translations";
 import { type Animal, type VisitRecord } from "@shared/schema";
 import {
   TrendingDown,
@@ -25,33 +23,47 @@ import {
 } from "lucide-react";
 
 export default function Analytics({ language = "en" }: { language?: string }) {
-  const { t } = useTranslation();
+  const t = (en: string, ur: string) => language === "en" ? en : ur;
   const [selectedSpecies, setSelectedSpecies] = useState<string>("all");
+  const [animals, setAnimals] = useState<Animal[]>([]);
+  const [visitRecords, setVisitRecords] = useState<VisitRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: animals = [] } = useQuery<Animal[]>({ 
-    queryKey: ["/api/animals"] 
-  });
-
-  const { data: visitRecords = [] } = useQuery<VisitRecord[]>({ 
-    queryKey: ["/api/visit-records"] 
-  });
+  // Fetch Data using useEffect
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetch("/api/animals").then(res => res.json()),
+      fetch("/api/visit-records").then(res => res.json())
+    ])
+    .then(([animalsData, visitsData]) => {
+      setAnimals(animalsData);
+      setVisitRecords(visitsData);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error("Analytics fetch error:", err);
+      setLoading(false);
+    });
+  }, []);
 
   const productivityMetrics = useMemo(() => {
-    return (animals || [])
+    if (!animals.length) return [];
+    return animals
       .filter((a) => a.species === "cow" || a.species === "buffalo")
       .map((animal) => {
-        const animalVisits = (visitRecords || []).filter((v) => v.animalId === animal.id);
+        const animalVisits = visitRecords.filter((v) => v.animalId === animal.id);
         const baseline = animal.species === "cow" ? 15 : 12;
         const illnessImpact = animalVisits.length * 0.8;
         const current = Math.max(0, baseline - illnessImpact);
-        const lossPercent = ((baseline - current) / baseline) * 100;
+        const lossPercent = baseline > 0 ? ((baseline - current) / baseline) * 100 : 0;
 
         return {
           id: animal.id,
           name: animal.name,
           species: animal.species,
-          current: current,
-          lossPercent: lossPercent,
+          current,
+          lossPercent,
           financialLoss: (baseline - current) * 120,
         };
       })
@@ -59,8 +71,9 @@ export default function Analytics({ language = "en" }: { language?: string }) {
   }, [animals, visitRecords, selectedSpecies]);
 
   const amrRisks = useMemo(() => {
-    return (animals || []).map((animal) => {
-      const antibiotics = (visitRecords || []).filter(
+    if (!animals.length) return [];
+    return animals.map((animal) => {
+      const antibiotics = visitRecords.filter(
         (v) => v.animalId === animal.id && 
         (v.treatment?.toLowerCase().includes("antibiotic") || v.treatment?.toLowerCase().includes("penicillin"))
       ).length;
@@ -76,12 +89,14 @@ export default function Analytics({ language = "en" }: { language?: string }) {
 
   const totalFinancialLoss = productivityMetrics.reduce((sum, m) => sum + m.financialLoss, 0);
 
+  if (loading) return <div className="p-8 text-slate-400">Loading Analytics...</div>;
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 min-h-screen bg-[#0f172a]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className={`text-3xl font-bold text-slate-100 ${language === 'ur' ? 'font-urdu' : ''}`}>
-            {t("analytics.title") || "Farm Analytics"}
+          <h1 className="text-3xl font-bold text-slate-100">
+            {t("Farm Analytics", "فارم کے تجزیات")}
           </h1>
         </div>
         <Select value={selectedSpecies} onValueChange={setSelectedSpecies}>

@@ -32,17 +32,25 @@ const Outbreaks = ({ language }: { language: string }) => {
       return;
     }
 
-    // FIX: Added status field required by Backend Schema
+    // Debugging
     const payload = {
       ...form,
       status: "active"
     };
+    console.log("Sending Payload:", payload);
 
     fetch("/api/outbreaks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
+      .then((response) => {
+        if (!response.ok) {
+          response.text().then(text => console.error("Error:", text));
+          throw new Error("Failed to save");
+        }
+        return response.json();
+      })
       .then(() => {
         setForm({ disease: "", geoCoordinates: "", province: "", advisory: "" });
         return fetch("/api/outbreaks");

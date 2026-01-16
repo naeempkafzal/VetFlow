@@ -26,24 +26,38 @@ const Inventory = ({ language }: { language: string }) => {
   }, []);
 
   const handleSubmit = () => {
-    if (!form.itemName || form.quantity <= 0 || form.cost <= 0) {
+    // 1. Validate explicitly
+    const quantity = parseInt(form.quantity.toString());
+    const cost = parseFloat(form.cost.toString());
+    const threshold = parseInt(form.lowStockThreshold.toString());
+
+    if (!form.itemName || isNaN(quantity) || isNaN(cost)) {
       alert(t("Please fill all fields correctly", "براہ کرم تمام فیلڈز صحیح طریقے سے بھریں"));
       return;
     }
-    
-    // FIX: Convert strings to numbers
+
+    // 2. Build Payload with NUMBERS
     const payload = {
       itemName: form.itemName,
-      quantity: parseInt(form.quantity.toString()),
-      cost: parseFloat(form.cost.toString()),
-      lowStockThreshold: parseInt(form.lowStockThreshold.toString()),
+      quantity: quantity,
+      cost: cost,
+      lowStockThreshold: threshold,
     };
-    
+
+    console.log("Sending Payload:", payload); // Debugging
+
     fetch("/api/inventory", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
+      .then((response) => {
+        if (!response.ok) {
+          response.text().then(text => console.error("Error:", text));
+          throw new Error("Failed to save");
+        }
+        return response.json();
+      })
       .then(() => {
         setForm({ itemName: "", quantity: 0, cost: 0, lowStockThreshold: 10 });
         return fetch("/api/inventory");
