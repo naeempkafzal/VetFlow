@@ -4,17 +4,14 @@ import {
   outbreaks, 
   visitRecords, 
   animals, 
-  vaccinations,
-  billings, // NEW
-  notifications // NEW
+  vaccinations
 } from "@shared/schema";
-import { db } from "./db";
 import { eq, asc, desc, sql, gte } from "drizzle-orm";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
-import { pool } from "./db";
+import { db, pool } from "./db";
 
-const PostgresSessionStore = connectPg(session);
+const PostgresSessionStore = connectPgSimple(session);
 
 export interface IStorage {
   getAnimals(): Promise<any[]>;
@@ -39,10 +36,9 @@ export interface IStorage {
   createOutbreak(outbreak: any): Promise<any>;
   updateOutbreakStatus(id: number, status: string): Promise<any>;
 
-  // NEW: Automation & Billing Methods
+  // Billing (Added via Schema)
   createBilling(billing: any): Promise<any>;
   getBillings(): Promise<any[]>;
-
   createNotification(notification: any): Promise<any>;
   getPendingNotifications(): Promise<any[]>;
 
@@ -89,7 +85,7 @@ export class DatabaseStorage implements IStorage {
     return app;
   }
 
-  // --- Inventory (with Auto-Deduction & Forecasting Support) ---
+  // --- Inventory (with Smart Logic) ---
   async getInventory(): Promise<any[]> {
     return await db.select().from(inventory).orderBy(asc(inventory.itemName));
   }
@@ -99,15 +95,15 @@ export class DatabaseStorage implements IStorage {
     return newItem;
   }
 
-  async deductStock(itemId: number, amount: number): Promise<any> {
-    // Updates both logical 'quantity' and tracking 'current_stock'
+  async deductStock(id: number, quantity: number): Promise<any> {
+    // Updates both logical 'quantity' and tracking 'currentStock'
     const [item] = await db.update(inventory)
       .set({ 
-        quantity: sql`${inventory.quantity} - ${amount}`,
-        currentStock: sql`${inventory.currentStock} - ${amount}`,
+        quantity: sql`${inventory.quantity} - ${quantity}`,
+        currentStock: sql`${inventory.currentStock} - ${quantity}`,
         lastUpdated: new Date()
       })
-      .where(eq(inventory.id, itemId))
+      .where(eq(inventory.id, id))
       .returning();
     
     // Auto-create notification if Low Stock
@@ -124,9 +120,9 @@ export class DatabaseStorage implements IStorage {
 
   // --- Visits ---
   async getVisitRecords(animalId?: number): Promise<any[]> {
-    if (animalId) {
-      return await db.select().from(visitRecords).where(eq(visitRecords.animalId, animalId)).orderBy(desc(visitRecords.visitDate));
-    }
+  if (animalId) {
+    return await db.select().from(visitRecords).where(eq(visitRecords.animalId, animalId)).orderBy(desc(visitRecords.visitDate));
+  }
     return await db.select().from(visitRecords).orderBy(desc(visitRecords.visitDate));
   }
 
@@ -137,14 +133,14 @@ export class DatabaseStorage implements IStorage {
 
   // --- Vaccinations ---
   async getVaccinations(animalId?: number): Promise<any[]> {
-    if (animalId) {
-      return await db.select().from(vaccinations).where(eq(vaccinations.animalId, animalId)).orderBy(desc(vaccinations.dateAdministered));
-    }
-    return await db.select().from(vaccinations).orderBy(desc(vaccinations.dateAdministered));
+  if (animalId) {
+    return await db.select().from(vaccinations).where(eq(vaccinations.animalId, animalId)).orderBy(desc(vaccinations.dateAdministered));
+  }
+  return await db.select().from(vaccinations).orderBy(desc(vaccinations.dateAdministered));
   }
 
   async createVaccination(insert: any): Promise<any> {
-    const [vax] = await db.insert(vaccinations).values(insert).returning();
+  const [vax] = await db.insert(vaccinations).values(insert).returning();
     return vax;
   }
 
@@ -154,18 +150,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOutbreak(insert: any): Promise<any> {
-    const [out] = await db.insert(outbreaks).values(insert).returning();
+  const [out] = await db.insert(outbreaks).values(insert).returning();
     return out;
   }
 
   async updateOutbreakStatus(id: number, status: string): Promise<any> {
-    const [out] = await db.update(outbreaks).set({ status }).where(eq(outbreaks.id, id)).returning();
+  const [out] = await db.update(outbreaks).set({ status }).where(eq(outbreaks.id, id)).returning();
     return out;
   }
 
-  // --- Billing (NEW) ---
+  // --- Billing (Added via Schema)
   async createBilling(billing: any): Promise<any> {
-    const [bill] = await db.insert(billings).values(billing).returning();
+  const [bill] = await db.insert(billing).values(billing).returning();
     return bill;
   }
 
@@ -173,14 +169,17 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(billings).orderBy(desc(billings.createdAt));
   }
 
-  // --- Notifications (NEW) ---
+  // --- Notifications (Added via Schema)
   async createNotification(notification: any): Promise<any> {
-    const [notif] = await db.insert(notifications).values(notification).returning();
+  const [notif] = await db.insert(notification).values({
+    ...notification,
+    isRead: false
+  }).returning();
     return notif;
   }
 
   async getPendingNotifications(): Promise<any[]> {
-    return await db.select().from(notifications).where(eq(notifications.isRead, false)).orderBy(asc(notifications.targetDate));
+  return await db.select().from(Notification).where(eq(Notification.isRead, false)).orderBy(asc(Notification.targetDate));
   }
 
   // Logic to satisfy interface if users aren't implemented

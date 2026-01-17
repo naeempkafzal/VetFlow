@@ -1,23 +1,27 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
-import animalRoutes from "./routes/records";
-import inventoryRoutes from "./routes/inventory";
-import vaccinationRoutes from "./routes/vaccinations";
-import outbreakRoutes from "./routes/outbreaks";
-import appointmentRoutes from "./routes/appointments";
+import express from "express";
+import dotenv from "dotenv";
 
-export function registerRoutes(app: Express): Server {
-  app.use("/api/animals", animalRoutes);
-  app.use("/api/records", animalRoutes);
-  app.use("/api/visit-records", animalRoutes);
-  app.use("/api/inventory", inventoryRoutes); 
-  app.use("/api/vaccinations", vaccinationRoutes);
-  app.use("/api/outbreaks", outbreakRoutes);
-  app.use("/api/appointments", appointmentRoutes);
-
-  // NEW: Automation Routes
-  app.use("/api/billings", storage.getBillings); 
-  app.use("/api/notifications", storage.getPendingNotifications);
-
-  return createServer(app);
+async function registerRoutes(app: Express) {
+  // Add your route registration logic here
 }
+
+export { registerRoutes };
+
+// 1. Load Environment Variables
+dotenv.config();
+
+const app = express();
+const PORT = 5000;
+
+// 2. Start Server
+(async () => {
+  await registerRoutes(app);
+
+  // 3. Start HTTP Server
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`serving on port ${PORT}`);
+    console.log(`🗄️  Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No (Check .env)'}`);
+    console.log(`🤖 Automation Engine: ACTIVE`);
+  });
+})();

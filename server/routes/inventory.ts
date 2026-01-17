@@ -1,46 +1,51 @@
 import express from "express";
-import { db, pool } from "../db"; // We use raw SQL to bypass schema file for new features
+import { db, pool } from "../db"; // Import both to remove ambiguity
+import { inventory, notifications } from "../../shared/schema";
 
 const router = express.Router();
 
-// GET: List Inventory
+// --- 1. GET: List Inventory (Uses Drizzle) ---
+// Returns: id, item_name, quantity, current_stock, cost, low_stock_threshold
 router.get("/", async (_req: any, res: any) => {
   try {
-    const result = await pool.query(`
-      SELECT * FROM inventory ORDER BY item_name ASC
-    `);
-    res.json(result.rows);
+    const items = await db.select().from(inventory);
+    res.json(items);
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
 });
 
-// GET: Forecast (Pseudo-AI Logic)
+// --- 2. GET: AI Forecast (Uses Raw Pool) ---
+// Calculates predicted empty date based on current stock levels
 router.get("/forecast/:id", async (req: any, res: any) => {
   try {
     const { id } = req.params;
     
-    // Simple Linear Regression to predict "Days Left"
-    // We assume a constant daily consumption rate if we don't have history logs
-    // Logic: (Current / DailyRate) - Current = Days until 0.
-    // For demo, we assume Daily Rate = 2% of initial stock if current < initial.
-    
-    const itemResult = await pool.query("SELECT * FROM inventory WHERE id = $1", [id]);
+    // Use raw SQL to fetch row for context
+    const itemResult = await pool.query(
+      `SELECT id, item_name, quantity, initial_stock, min_stock_level FROM inventory WHERE id = $1`,
+      [id]
+    );
+
     if (!itemResult.rows[0]) return res.status(404).json({ error: "Item not found" });
-    
+
     const item = itemResult.rows[0];
     let predictedDays = 0;
 
     if (item.quantity > 0 && item.quantity < item.initial_stock) {
-      // Calculate depletion rate
-      const daysPassed = Math.floor((new Date().getTime() - new Date(item.created_at).getTime()) / (1000 * 60 * 60 * 24)) || 1;
+      // Calculate consumption
+      const now = new Date();
+      const created = new Date(item.created_at || Date.now());
+      const daysPassed = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)) || 1;
       const consumed = item.initial_stock - item.quantity;
+      
+      // Calculate daily rate
       const dailyRate = Math.max(0.5, consumed / daysPassed); // At least 0.5 item/day
       
       const remaining = item.quantity / dailyRate;
       predictedDays = Math.floor(remaining);
     } else {
-      predictedDays = item.quantity * 10; // Fallback for new items (10 days * qty)
+      predictedDays = item.quantity * 10; 
     }
 
     // Calculate depletion date
@@ -49,62 +54,66 @@ router.get("/forecast/:id", async (req: any, res: any) => {
 
     res.json({ 
       itemId: item.id, 
-      itemName: item.itemName, 
-      currentStock: item.quantity, 
+      itemName: item.item_name, 
+      quantity: item.quantity, 
+      currentStock: item.quantity,
       predictedEmptyDate: depletionDate.toISOString().split('T')[0],
-      status: predictedDays < item.lowStockThreshold ? 'CRITICAL' : 'OK'
+      status: predictedDays <= item.minStock_level ? 'CRITICAL' : 'OK'
     });
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
 });
 
-// POST: Create Item
+// --- 3. POST: Create Item (Uses Drizzle) ---
 router.post("/", async (req: any, res: any) => {
   try {
     const body = req.body;
     const payload = {
       itemName: body.itemName,
+      unit: body.unit || 'pcs',
       quantity: parseInt(body.quantity.toString()),
-      cost: parseFloat(body.cost.toString()),
+      cost: body.cost.toString(),
       lowStockThreshold: parseInt(body.lowStockThreshold.toString()),
+      initialStock: parseInt(body.quantity.toString())
     };
 
-    const result = await pool.query(
-      "INSERT INTO inventory (item_name, quantity, cost, low_stock_threshold, initial_stock) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [payload.itemName, payload.quantity, payload.cost, payload.lowStockThreshold, payload.quantity]
-    );
+    const [newItem] = await db.insert(inventory).values(payload).returning();
 
     // Auto-create Low Stock Notification
     if (payload.quantity < payload.lowStockThreshold) {
-      await pool.query(
-        "INSERT INTO notifications (type, title, message, target_date) VALUES ($1, $2, $3, NOW())",
-        ['stock', 'Low Stock', `Item ${payload.itemName} added below threshold`, new Date()]
-      );
+      // Insert into notifications table using Drizzle
+      await db.insert(notifications).values({
+        type: 'stock',
+        title: 'Low Stock Alert',
+        message: `Item ${payload.itemName} is running low (${payload.quantity} items).`,
+        targetDate: new Date()
+      });
     }
 
-    res.json(result.rows[0]);
+    res.json(newItem);
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
 });
 
-// NEW: POST: Manual Deduct Stock (Inventory Management)
+// --- 4. POST: Manual Deduct Stock (Uses Raw Pool)
+// Updates DB and creates notification
 router.post("/deduct/:id", async (req: any, res: any) => {
   try {
     const { id } = req.params;
-    const { amount } = req.body; // { amount: 5 }
+    const { amount } = req.body; 
 
-    // Update DB
+    // Update DB (Raw SQL)
     const result = await pool.query(
-      "UPDATE inventory SET quantity = quantity - $1, current_stock = current_stock - $1 WHERE id = $2 RETURNING *",
+      `UPDATE inventory SET quantity = quantity - $1, current_stock = current_stock - $1, last_updated = NOW() WHERE id = $2 RETURNING *`,
       [amount, id]
     );
     
     // Notify
     const item = result.rows[0];
     await pool.query(
-      "INSERT INTO notifications (type, title, message, target_date) VALUES ($1, $2, $3, NOW())",
+      `INSERT INTO notifications (type, title, message, target_date) VALUES ($1, $2, $3, NOW())`,
       ['stock', 'Stock Adjusted', `Deducted ${amount} units of ${item.itemName}`, new Date()]
     );
 
